@@ -169,8 +169,7 @@ class Obfuscator:
 
         self.obfuscated.add_line(f"{self.exec}({code})")
 
-        self.obfuscated.indent_level -= 1
-        self.obfuscated.indent_level -= 1
+        self.obfuscated.indent_level -= 2
 
         self.obfuscated.add_line(
             f"if {self.hash}({self.exec}('id'))=={self.hash}({self.none}) "

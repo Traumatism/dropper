@@ -4,7 +4,7 @@ import base64
 import tokenize
 
 from .utils import (
-    docstring, obfuscate_int, string_to_hex,
+    obfuscate_int, string_to_hex,
     obfuscate_string
 )
 
@@ -43,7 +43,10 @@ class Obfuscator:
         self.generated_strings: list[str] = []
 
         self.eval = self.junk_string(10)
-        self.main = self.junk_string(10)
+
+        self.mainf = self.junk_string(10)
+        self.mainc = self.junk_string(10)
+
         self.exec = self.junk_string(10)
         self.none = self.junk_string(10)
         self.name = self.junk_string(10)
@@ -113,16 +116,24 @@ class Obfuscator:
         x = self.junk_string(10)
 
         self.obfuscated.add_line(
-            f"def {self.main}(**{x})->{self.none}:"
+            f"class {self.mainc}:"
         )
 
         self.obfuscated.indent_level += 1
 
-        self.obfuscated.add_line(f"del {x}")
+        self.obfuscated.add_line(
+            f"def __init__(_, **{x})->{self.none}:"
+        )
+
+        self.obfuscated.indent_level += 1
+        self.obfuscated.add_line(f"_.{x} = {x}")
+        self.obfuscated.indent_level -= 1
 
         self.obfuscated.add_line(
-            docstring(f"exec(base64.b64decode({self.junk_string(30)}))")
+            f"def {self.mainf}(_, **{x})->{self.none}:"
         )
+
+        self.obfuscated.indent_level += 1
 
         lines = self.obfuscate_tokens().splitlines()
 
@@ -134,8 +145,10 @@ class Obfuscator:
                 f"{self.arra} += {obfuscate_string(line)}\n"
             )
 
+        self.obfuscated.add_line(f"del {x}")
         self.obfuscated.add_line(f"{self.exec}({self.arra})")
 
+        self.obfuscated.indent_level -= 1
         self.obfuscated.indent_level -= 1
 
         self.obfuscated.add_line(
@@ -150,7 +163,7 @@ class Obfuscator:
         self.obfuscated.indent_level += 1
 
         self.obfuscated.add_line(
-            f"{self.exec}('{self.main}()')"
+            f"{self.exec}('{self.mainc}().{self.mainf}()')"
         )
 
     def junk_string(self, length: int = 10, b64: bool = False) -> str:

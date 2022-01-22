@@ -144,7 +144,7 @@ class Obfuscator:
         self.obfuscated.indent_level += 1
 
         self.obfuscated.add_line(
-            f"{self.exec}('{self.main_func}()')"
+            f"{self.exec}('{self.main}()')"
         )
 
     def junk_string(self, length: int = 10, b64: bool = False) -> str:

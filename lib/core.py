@@ -64,6 +64,7 @@ class Obfuscator:
         tokens = []
 
         for token in _tokens:
+
             if token.type == 62:
                 continue
 
@@ -129,7 +130,9 @@ class Obfuscator:
         )
 
         self.obfuscated.indent_level += 1
+
         self.obfuscated.add_line(f"_.{x} = {x}")
+
         self.obfuscated.indent_level -= 1
 
         self.obfuscated.add_line(
@@ -144,25 +147,27 @@ class Obfuscator:
 
         for line in lines:
             line += "\n"
+
             self.obfuscated.add_line(
                 f"{self.arra} += {obfuscate_string(line)}\n"
             )
 
         self.obfuscated.add_line(f"del {x}")
 
-        self.obfuscated.add_line(
-            f"{self.eval}"
-            "("
-            f"{self.comp}"
-            "("
-            f"{self.arra}"
-            ", "
-            f"'{obfuscate_string('<string>', range=(1, 2))}'"
-            ", "
-            f"{obfuscate_string('exec', range=(1, 2))}"
-            ")"
-            ")"
-        )
+        code = ""
+        code += self.eval
+        code += "("
+        code += self.comp
+        code += "("
+        code += self.arra
+        code += ","
+        code += obfuscate_string('<string>', range=(1, 2))
+        code += ","
+        code += obfuscate_string('exec')
+        code += ")"
+        code += ")"
+
+        self.obfuscated.add_line(f"{self.exec}({code})")
 
         self.obfuscated.indent_level -= 1
         self.obfuscated.indent_level -= 1

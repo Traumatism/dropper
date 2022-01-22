@@ -48,6 +48,7 @@ class Obfuscator:
         self.mainc = self.junk_string(10)
 
         self.exec = self.junk_string(10)
+        self.comp = self.junk_string(10)
         self.none = self.junk_string(10)
         self.name = self.junk_string(10)
         self.hash = self.junk_string(10)
@@ -104,13 +105,15 @@ class Obfuscator:
         )
 
         self.obfuscated.add_line(
-            f"{self.none},{self.name},{self.hash}"
+            f"{self.none},{self.name},{self.hash},{self.comp}"
             "="
             f"{self.eval}('{string_to_hex('None')}')"
             ","
             f"{self.eval}('{string_to_hex('__name__')}')"
             ","
             f"{self.eval}('{string_to_hex('hash')}')"
+            ","
+            f"{self.eval}('{string_to_hex('compile')}')"
         )
 
         x = self.junk_string(10)
@@ -146,7 +149,20 @@ class Obfuscator:
             )
 
         self.obfuscated.add_line(f"del {x}")
-        self.obfuscated.add_line(f"{self.exec}({self.arra})")
+
+        self.obfuscated.add_line(
+            f"{self.eval}"
+            "("
+            f"{self.comp}"
+            "("
+            f"{self.arra}"
+            ", "
+            f"'{obfuscate_string('<string>', range=(1, 2))}'"
+            ", "
+            f"{obfuscate_string('exec', range=(1, 2))}"
+            ")"
+            ")"
+        )
 
         self.obfuscated.indent_level -= 1
         self.obfuscated.indent_level -= 1

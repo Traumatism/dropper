@@ -48,13 +48,12 @@ class Obfuscator:
         self.none = self.junk_string(10)
         self.name = self.junk_string(10)
         self.hash = self.junk_string(10)
+        self.arra = self.junk_string(10)
 
         self.obfuscated = Obfuscated()
         self.ident_level: int = 0
 
-    def obfuscate_content(self) -> str:
-        """ Obfuscate the content of the file """
-
+    def obfuscate_tokens(self) -> str:
         self.console.print("Tokenizing code...")
 
         _tokens = tokenize.generate_tokens(self.file.readline)
@@ -84,10 +83,7 @@ class Obfuscator:
 
             tokens.append(token)
 
-        return (
-            f"{self.exec}"
-            f"({obfuscate_string(tokenize.untokenize(tokens), range=(1, 1))})"
-        )
+        return tokenize.untokenize(tokens)
 
     def obfuscate(self):
         """ Obfuscate the code """
@@ -128,7 +124,17 @@ class Obfuscator:
             docstring(f"exec(base64.b64decode({self.junk_string(30)}))")
         )
 
-        self.obfuscated.add_line(self.obfuscate_content())
+        lines = self.obfuscate_tokens().splitlines()
+
+        self.obfuscated.add_line(f"{self.arra}=''")
+
+        for line in lines:
+            line += "\n"
+            self.obfuscated.add_line(
+                f"{self.arra} += {obfuscate_string(line)}\n"
+            )
+
+        self.obfuscated.add_line(f"{self.exec}({self.arra})")
 
         self.obfuscated.indent_level -= 1
 

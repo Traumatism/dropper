@@ -12,11 +12,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "-f", "--file",
+        "-f",
+        "--file",
         help="The file to obfuscate",
         required=True,
         metavar="<path>",
-        dest="file"
+        dest="file",
     )
 
     args = parser.parse_args()

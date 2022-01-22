@@ -43,12 +43,11 @@ class Obfuscator:
         self.generated_strings: list[str] = []
 
         self.eval = self.junk_string(10)
-        self.main_func = self.junk_string(10)
+        self.main = self.junk_string(10)
         self.exec = self.junk_string(10)
         self.none = self.junk_string(10)
         self.name = self.junk_string(10)
         self.hash = self.junk_string(10)
-        self.array = self.junk_string(10)
 
         self.obfuscated = Obfuscated()
         self.ident_level: int = 0
@@ -115,11 +114,15 @@ class Obfuscator:
             f"{self.eval}('{string_to_hex('hash')}')"
         )
 
+        x = self.junk_string(10)
+
         self.obfuscated.add_line(
-            f"def {self.main_func}(**{self.junk_string(10)})->{self.none}:"
+            f"def {self.main}(**{x})->{self.none}:"
         )
 
         self.obfuscated.indent_level += 1
+
+        self.obfuscated.add_line(f"del {x}")
 
         self.obfuscated.add_line(
             docstring(f"exec(base64.b64decode({self.junk_string(30)}))")

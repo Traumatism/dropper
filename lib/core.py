@@ -138,8 +138,6 @@ class Obfuscator:
         self.obfuscated.add_line(f"del {x}")
 
         code = ""
-        code += self.eval
-        code += "("
         code += self.comp
         code += "("
         code += self.arra
@@ -147,7 +145,6 @@ class Obfuscator:
         code += obfuscate_string("<string>", range=(1, 2))
         code += ","
         code += obfuscate_string("exec")
-        code += ")"
         code += ")"
 
         self.obfuscated.add_line(f"{self.exec}({code})")

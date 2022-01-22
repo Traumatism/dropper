@@ -39,7 +39,7 @@ def int_to_list_of_bool(num: int) -> list[bool]:
     return results
 
 
-def obfuscate_string(string: str, range=(50, 100)) -> str:
+def obfuscate_string(string: str, range=(25, 50)) -> str:
     """ Obfuscate a string """
 
     array = (obfuscate_int(ord(char), range=range) for char in string)

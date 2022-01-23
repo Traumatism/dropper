@@ -8,4 +8,4 @@ A simple but powerful Python 3 scripts obfuscator.
 Report are welcome, open an issue or DM me on Discord: toast#3108
 
     - Overflow error due to massive recursion on heavy files.
-    - Suspicious Python cross versions support
+    - Bugous imports

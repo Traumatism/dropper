@@ -59,6 +59,7 @@ class Obfuscator:
             if token.type == 62:
                 continue
 
+            """
             if token.type == 3:
                 token = tokenize.TokenInfo(
                     type=token.type,
@@ -67,6 +68,7 @@ class Obfuscator:
                     end=token.end,
                     line=token.line,
                 )
+            """
 
             if token.type == 2:
                 token = tokenize.TokenInfo(
@@ -93,6 +95,7 @@ class Obfuscator:
         obfuscated_exec = f"{self.eval}({obfuscate_string('exec')})"
 
         self.obfuscated.add_line(f"{self.exec}={obfuscated_exec};", end="")
+        self.obfuscated.add_line("\n")
 
         self.obfuscated.add_line(
             f"{self.none},{self.name},{self.hash},{self.comp}"
@@ -106,36 +109,18 @@ class Obfuscator:
             f"{self.eval}('{string_to_hex('compile')}')"
         )
 
-        x = self.junk_string(10)
-
-        self.obfuscated.add_line(f"class {self.mainc}:")
-
-        self.obfuscated.indent_level += 1
-
-        self.obfuscated.add_line(f"def __init__(_, **{x})->{self.none}:")
-
-        self.obfuscated.indent_level += 1
-
-        self.obfuscated.add_line(f"_.{x} = {x}")
-
-        self.obfuscated.indent_level -= 1
-
-        self.obfuscated.add_line(f"def {self.mainf}(_, **{x})->{self.none}:")
-
-        self.obfuscated.indent_level += 1
-
         lines = self.obfuscate_tokens().splitlines()
 
-        self.obfuscated.add_line(f"{self.arra}=''")
+        self.obfuscated.add_line(
+            f"{self.arra}={self.eval}({obfuscate_string('str()')});"
+        )
 
         for line in lines:
             line += "\n"
 
             self.obfuscated.add_line(
-                f"{self.arra} += {obfuscate_string(line)}\n"
+                f"{self.arra}+={obfuscate_string(line)};"
             )
-
-        self.obfuscated.add_line(f"del {x}")
 
         code = ""
         code += self.comp
@@ -148,23 +133,6 @@ class Obfuscator:
         code += ")"
 
         self.obfuscated.add_line(f"{self.exec}({code})")
-
-        self.obfuscated.indent_level -= 2
-
-        self.obfuscated.add_line(
-            f"if {self.hash}({self.exec}('id'))=={self.hash}({self.none}) "
-            f"or not not not not not {self.name} not in ("
-            f"{obfuscate_string('__main__')}"
-            ","
-            f"{obfuscate_string(self.junk_string(10))}"
-            "):"
-        )
-
-        self.obfuscated.indent_level += 1
-
-        self.obfuscated.add_line(
-            f"{self.exec}('{self.mainc}().{self.mainf}()')"
-        )
 
     def junk_string(self, length: int = 10, b64: bool = False) -> str:
         """Generate a random string of a given length"""

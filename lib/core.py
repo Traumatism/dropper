@@ -33,6 +33,11 @@ class Obfuscator:
 
         self.file = open(file_name, "r")
 
+        with open(file_name, "r") as file:
+            if "# hello from dwoppah" in file.read():
+                self.console.print("Already obfuscated!")
+                exit(0)
+
         self.generated_strings: list[str] = []
 
         self.eval = self.junk_string(10)
@@ -161,7 +166,7 @@ class Obfuscator:
             "sys.setrecursionlimit(999999999)\n"
             "exec("
             f"__import__('{string_to_hex('zlib')}').decompress({compressed})"
-            ")"
+            ")  # hello from dwoppah"
         )
 
         final_size = len(final)

@@ -1,4 +1,21 @@
 import random
+import base64
+
+
+def base64_string(string: str) -> str:
+    """Convert a string to base64"""
+    encoded = base64.b64encode(string.encode()).decode()
+
+    return (
+        f"__import__('{string_to_hex('base64')}')"
+        f".b64decode(b'{string_to_hex(encoded)}')"
+        ".decode()"
+    )
+
+
+def obfuscate_bool(bool_: bool) -> str:
+    """Obfuscate a boolean"""
+    return f"bool({obfuscate_int(1 if bool_ else 0)})"
 
 
 def random_bit(as_bool: bool = False) -> int | bool:

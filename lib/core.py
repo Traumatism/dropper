@@ -3,7 +3,12 @@ import random
 import base64
 import tokenize
 
-from .utils import obfuscate_int, string_to_hex, obfuscate_string
+from .utils import (
+    base64_string, string_to_hex,
+    obfuscate_bool,
+    obfuscate_int,
+    obfuscate_string,
+)
 
 from rich.console import Console
 
@@ -57,6 +62,7 @@ class Obfuscator:
         self.console.print("Tokenizing code...")
 
         _tokens = tokenize.generate_tokens(self.file.readline)
+
         tokens = []
 
         for token in _tokens:
@@ -64,21 +70,31 @@ class Obfuscator:
             if token.type == 62:
                 continue
 
-            """
             if token.type == 3:
                 token = tokenize.TokenInfo(
                     type=token.type,
-                    string=obfuscate_string(token.string[1:-1], range=(1, 3)),
+                    string=base64_string(token.string[1:-1]),
                     start=token.start,
                     end=token.end,
                     line=token.line,
                 )
-            """
 
             if token.type == 2:
                 token = tokenize.TokenInfo(
                     type=token.type,
                     string=obfuscate_int(int(token.string), range=(1, 3)),
+                    start=token.start,
+                    end=token.end,
+                    line=token.line,
+                )
+
+            if (
+                token.type == 1
+                and token.string in ("False", "True")
+            ):
+                token = tokenize.TokenInfo(
+                    type=token.type,
+                    string=obfuscate_bool(eval(token.string)),
                     start=token.start,
                     end=token.end,
                     line=token.line,
@@ -114,7 +130,9 @@ class Obfuscator:
             f"{self.eval}('{string_to_hex('compile')}')"
         )
 
-        lines = self.obfuscate_tokens().splitlines()
+        obfuscated_tokens = self.obfuscate_tokens()
+
+        lines = obfuscated_tokens.splitlines()
 
         self.obfuscated.add_line(
             f"{self.arra}={self.eval}({obfuscate_string('str()')});"
@@ -150,8 +168,7 @@ class Obfuscator:
 
         return (
             base64.b64encode(string.encode()).decode().replace("=", "")
-            if base64
-            else string
+            if base64 else string
         )
 
     def finalize(self) -> str:

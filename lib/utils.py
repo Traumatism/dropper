@@ -2,6 +2,11 @@ import random
 import base64
 
 
+def xor_string(string: str, key: int) -> str:
+    """XOR a string with a key"""
+    return "".join(chr(ord(char) ^ key) for char in string)
+
+
 def base64_string(string: str) -> str:
     """Convert a string to base64"""
     encoded = base64.b64encode(string.encode()).decode()

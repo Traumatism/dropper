@@ -5,9 +5,10 @@ import tokenize
 
 from .utils import (
     base64_string, string_to_hex,
+    random_bit,
     obfuscate_bool,
     obfuscate_int,
-    obfuscate_string,
+    obfuscate_string, xor_string,
 )
 
 from rich.console import Console
@@ -20,7 +21,7 @@ class Obfuscated:
         self.indent_level: int = 0
         self.__content: str = ""
 
-    def add_line(self, line: str, end=" # skidder\n") -> None:
+    def add_line(self, line: str, end=" # /!\\ POWAH OF UWU /!\\\n") -> None:
         """Add a line to the code"""
         self.__content += ("    " * self.indent_level) + line + end
 
@@ -44,6 +45,8 @@ class Obfuscator:
                 exit(0)
 
         self.generated_strings: list[str] = []
+
+        self.xor_key = random.randint(10000, 99999)
 
         self.eval = self.junk_string(10)
         self.mainf = self.junk_string(10)
@@ -71,15 +74,26 @@ class Obfuscator:
                 continue
 
             if token.type == 3:
+                key = random.randint(0, 255)
+
+                encoded = xor_string(token.string[1:-1], key)
+                obfuscated_key = obfuscate_int(key)
+
+                real = (
+                    f"(''.join(chr(ord(char)^{obfuscated_key}) "
+                    f"for char in {base64_string(encoded)}))"
+                )
+
                 token = tokenize.TokenInfo(
                     type=token.type,
-                    string=base64_string(token.string[1:-1]),
+                    string=real,
                     start=token.start,
                     end=token.end,
                     line=token.line,
                 )
 
             if token.type == 2:
+
                 token = tokenize.TokenInfo(
                     type=token.type,
                     string=obfuscate_int(int(token.string), range=(1, 3)),
@@ -88,10 +102,8 @@ class Obfuscator:
                     line=token.line,
                 )
 
-            if (
-                token.type == 1
-                and token.string in ("False", "True")
-            ):
+            if token.type == 1 and token.string in ("False", "True"):
+
                 token = tokenize.TokenInfo(
                     type=token.type,
                     string=obfuscate_bool(eval(token.string)),
@@ -119,13 +131,9 @@ class Obfuscator:
         self.obfuscated.add_line("\n")
 
         self.obfuscated.add_line(
-            f"{self.none},{self.name},{self.hash},{self.comp}"
+            f"{self.none},{self.comp}"
             "="
             f"{self.eval}('{string_to_hex('None')}')"
-            ","
-            f"{self.eval}('{string_to_hex('__name__')}')"
-            ","
-            f"{self.eval}('{string_to_hex('hash')}')"
             ","
             f"{self.eval}('{string_to_hex('compile')}')"
         )
@@ -141,9 +149,20 @@ class Obfuscator:
         for line in lines:
             line += "\n"
 
-            self.obfuscated.add_line(
-                f"{self.arra}+={obfuscate_string(line)};"
-            )
+            if bool(random_bit()):
+                self.obfuscated.add_line(
+                    f"{self.arra}+={obfuscate_string(line)};"
+                )
+
+            else:
+                encoded = xor_string(line, self.xor_key)
+                obfuscated_key = obfuscate_int(self.xor_key)
+
+                self.obfuscated.add_line(
+                    f"{self.arra}+="
+                    f"''.join(chr(ord(_)^{obfuscated_key}) "
+                    f"for _ in '{encoded}');"
+                )
 
         code = ""
         code += self.comp
@@ -188,6 +207,9 @@ class Obfuscator:
 
         final_size = len(final)
 
-        self.console.print(f"Final code lenght: {final_size:,} ")
+        self.console.print(
+            f"Final code size: {final_size:,} "
+            "(This is very variable, restart the program to get another size)"
+        )
 
         return final

@@ -54,6 +54,7 @@ class Obfuscator:
         self.arra = self.junk_string(10)
 
         self.obfuscated = Obfuscated()
+        self.ident_level: int = 0
 
     def obfuscate_tokens(self) -> str:
         self.console.print("Tokenizing code...")
@@ -65,7 +66,13 @@ class Obfuscator:
         for token in _tokens:
 
             if token.type in (61, 62):
-                continue
+                token = tokenize.TokenInfo(
+                    type=token.type,
+                    string="",
+                    start=token.start,
+                    end=token.end,
+                    line=token.line,
+                )
 
             if token.type == 3:
 

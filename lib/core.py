@@ -4,36 +4,39 @@ import base64
 import tokenize
 
 from .utils import (
-    base64_string, string_to_hex,
+    base64_string,
+    string_to_hex,
     random_bit,
     obfuscate_bool,
     obfuscate_int,
     obfuscate_string,
-    xor_string, generate_xor_key
+    xor_string,
+    generate_xor_key,
+    edit_token
 )
 
 from rich.console import Console
 
 
 class Obfuscated:
-    """Manage obfuscated code"""
+    """ Manage obfuscated code """
 
     def __init__(self):
         self.indent_level: int = 0
         self.__content: str = ""
 
     def add_line(self, line: str, end="\n") -> None:
-        """Add a line to the code"""
+        """ Add a line to the code """
         self.__content += ("    " * self.indent_level) + line + end
 
     @property
     def content(self) -> str:
-        """Return the content"""
+        """ Return the content """
         return self.__content
 
 
 class Obfuscator:
-    """Obfuscate a file"""
+    """ Obfuscate a file """
 
     def __init__(self, file_name: str):
         self.console = Console()
@@ -49,6 +52,8 @@ class Obfuscator:
 
         self.eval = self.junk_string(10)
         self.exec = self.junk_string(10)
+        self.ord = self.junk_string(10)
+        self.chr = self.junk_string(10)
         self.comp = self.junk_string(10)
         self.none = self.junk_string(10)
         self.arra = self.junk_string(10)
@@ -63,16 +68,12 @@ class Obfuscator:
 
         tokens = []
 
+        self.console.print("Obfuscating tokens...")
+
         for token in _tokens:
 
             if token.type in (61, 62):
-                token = tokenize.TokenInfo(
-                    type=token.type,
-                    string="",
-                    start=token.start,
-                    end=token.end,
-                    line=token.line,
-                )
+                token = edit_token(token, "")
 
             if token.type == 3:
 
@@ -87,33 +88,15 @@ class Obfuscator:
                     f"for char in {base64_string(encoded)}))"
                 )
 
-                token = tokenize.TokenInfo(
-                    type=token.type,
-                    string=real,
-                    start=token.start,
-                    end=token.end,
-                    line=token.line,
-                )
+                token = edit_token(token, real)
 
             if token.type == 2:
-
-                token = tokenize.TokenInfo(
-                    type=token.type,
-                    string=obfuscate_int(int(token.string), range=(1, 3)),
-                    start=token.start,
-                    end=token.end,
-                    line=token.line,
+                token = edit_token(
+                    token, obfuscate_int(int(token.string), range=(1, 3))
                 )
 
             if token.type == 1 and token.string in ("False", "True"):
-
-                token = tokenize.TokenInfo(
-                    type=token.type,
-                    string=obfuscate_bool(eval(token.string)),
-                    start=token.start,
-                    end=token.end,
-                    line=token.line,
-                )
+                token = edit_token(token, obfuscate_bool(eval(token.string)))
 
             tokens.append(token)
 
@@ -134,15 +117,20 @@ class Obfuscator:
         self.obfuscated.add_line("\n")
 
         self.obfuscated.add_line(
-            f"{self.none},{self.comp}"
+            f"{self.none},{self.comp},{self.chr},{self.ord}"
             "="
             f"{self.eval}('{string_to_hex('None')}')"
             ","
             f"{self.eval}('{string_to_hex('compile')}')"
+            ","
+            f"{self.eval}('{string_to_hex('chr')}')"
+            ","
+            f"{self.eval}('{string_to_hex('ord')}')"
         )
 
         obfuscated_tokens = self.obfuscate_tokens()
 
+        self.console.print("Splitting and re-organizating the code...")
         lines = obfuscated_tokens.splitlines()
 
         self.obfuscated.add_line(
@@ -165,7 +153,7 @@ class Obfuscator:
 
                 self.obfuscated.add_line(
                     f"{self.arra}+="
-                    f"''.join(chr(ord(_)^{obfuscated_key}) "
+                    f"''.join({self.chr}({self.ord}(_)^{obfuscated_key})"
                     f"for _ in {base64_string(encoded)});"
                 )
 
@@ -183,7 +171,7 @@ class Obfuscator:
         self.obfuscated.add_line(f"{self.exec}({code})")
 
     def junk_string(self, length: int = 10, b64: bool = False) -> str:
-        """Generate a random string of a given length"""
+        """ Generate a random string of a given length """
         string = "".join(random.choice("Il") for _ in range(length))
 
         if string in self.generated_strings:
@@ -197,7 +185,7 @@ class Obfuscator:
         )
 
     def finalize(self) -> str:
-        """Finalize the code"""
+        """ Finalize the code """
 
         self.console.print("Finalizing with zlib compression...")
 

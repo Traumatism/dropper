@@ -68,14 +68,14 @@ def int_to_list_of_bool(num: int) -> list[bool]:
     return results
 
 
-def obfuscate_string(string: str, range=(10, 15)) -> str:
+def obfuscate_string(string: str, range=(10, 15), _eval: str = "eval") -> str:
     """ Obfuscate a string """
 
     array = (obfuscate_int(ord(char), range=range) for char in string)
     quote = random.choice(("'", '"'))
 
     obfuscated = "".join(
-        f"eval({quote}{string_to_hex('chr')}{quote})({obf_chr})+"
+        f"{_eval}({quote}{string_to_hex('chr')}{quote})({obf_chr})+"
         for obf_chr in array
     )
 

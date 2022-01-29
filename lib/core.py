@@ -6,7 +6,6 @@ import tokenize
 from .utils import (
     base64_string,
     string_to_hex,
-    random_bit,
     obfuscate_bool,
     obfuscate_int,
     obfuscate_string,
@@ -18,25 +17,24 @@ from .utils import (
 from rich.console import Console
 
 
-class Obfuscated:
-    """ Manage obfuscated code """
-
-    def __init__(self):
-        self.indent_level: int = 0
-        self.__content: str = ""
-
-    def add_line(self, line: str, end="\n") -> None:
-        """ Add a line to the code """
-        self.__content += ("    " * self.indent_level) + line + end
-
-    @property
-    def content(self) -> str:
-        """ Return the content """
-        return self.__content
-
-
 class Obfuscator:
     """ Obfuscate a file """
+
+    class Obfuscated:
+        """ Manage obfuscated code """
+
+        def __init__(self):
+            self.indent_level: int = 0
+            self.__content: str = ""
+
+        def add_line(self, line: str, end="\n") -> None:
+            """ Add a line to the code """
+            self.__content += ("    " * self.indent_level) + line + end
+
+        @property
+        def content(self) -> str:
+            """ Return the content """
+            return self.__content
 
     def __init__(self, file_name: str):
         self.console = Console()
@@ -52,13 +50,16 @@ class Obfuscator:
 
         self.eval = self.junk_string(3)
         self.exec = self.junk_string(3)
-        self.ord = self.junk_string(3)
-        self.chr = self.junk_string(3)
+
         self.comp = self.junk_string(3)
         self.none = self.junk_string(3)
-        self.arra = self.junk_string(3)
 
-        self.obfuscated = Obfuscated()
+        self.ord = self.junk_string(3)
+        self.chr = self.junk_string(3)
+
+        self.splitted = self.junk_string(3)
+
+        self.obfuscated = self.Obfuscated()
         self.ident_level: int = 0
 
     def obfuscate_tokens(self) -> str:
@@ -125,43 +126,41 @@ class Obfuscator:
             ","
             f"{self.eval}('{string_to_hex('chr')}')"
             ","
-            f"{self.eval}('{string_to_hex('ord')}')"
+            f"{self.eval}('{string_to_hex('ord')}')",
+            end=";"
         )
 
         obfuscated_tokens = self.obfuscate_tokens()
 
         self.console.print("Splitting and re-organizating the code...")
 
-        lines = obfuscated_tokens.splitlines()
-
         self.obfuscated.add_line(
-            f"{self.arra}={self.eval}({obfuscate_string('str()')});"
+            f"{self.splitted}="
+            f"{self.eval}({obfuscate_string('str()', _eval=self.eval)})",
+            end=";"
         )
 
-        for line in lines:
-            line += "\n"
+        parts = map(
+            lambda x: f"{x}\n",
+            obfuscated_tokens.splitlines()
+        )
 
-            if bool(random_bit()):
+        for part in parts:
+            encoded = xor_string(part, key := generate_xor_key())
 
-                self.obfuscated.add_line(
-                    f"{self.arra}+={obfuscate_string(line)};"
-                )
+            obfuscated_key = obfuscate_int(key)
 
-            else:
-
-                encoded = xor_string(line, key := generate_xor_key())
-                obfuscated_key = obfuscate_int(key)
-
-                self.obfuscated.add_line(
-                    f"{self.arra}+="
-                    f"''.join({self.chr}({self.ord}(_)^{obfuscated_key})"
-                    f"for _ in {base64_string(encoded)});"
-                )
+            self.obfuscated.add_line(
+                f"{self.splitted}+="
+                f"''.join({self.chr}({self.ord}(_)^{obfuscated_key})"
+                f"for(_)in({base64_string(encoded)}));",
+                end=""
+            )
 
         code = (
             self.comp
             + "("
-            + self.arra
+            + self.splitted
             + ","
             + obfuscate_string("<string>", range=(1, 2))
             + ","

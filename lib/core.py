@@ -8,7 +8,8 @@ from .utils import (
     random_bit,
     obfuscate_bool,
     obfuscate_int,
-    obfuscate_string, xor_string,
+    obfuscate_string,
+    xor_string, generate_xor_key
 )
 
 from rich.console import Console
@@ -46,16 +47,10 @@ class Obfuscator:
 
         self.generated_strings: list[str] = []
 
-        self.xor_key = random.randint(10000, 99999)
-
         self.eval = self.junk_string(10)
-        self.mainf = self.junk_string(10)
-        self.mainc = self.junk_string(10)
         self.exec = self.junk_string(10)
         self.comp = self.junk_string(10)
         self.none = self.junk_string(10)
-        self.name = self.junk_string(10)
-        self.hash = self.junk_string(10)
         self.arra = self.junk_string(10)
 
         self.obfuscated = Obfuscated()
@@ -74,9 +69,11 @@ class Obfuscator:
                 continue
 
             if token.type == 3:
-                key = random.randint(0, 255)
 
-                encoded = xor_string(token.string[1:-1], key)
+                encoded = xor_string(
+                    token.string[1:-1], key := generate_xor_key()
+                )
+
                 obfuscated_key = obfuscate_int(key)
 
                 real = (
@@ -150,13 +147,15 @@ class Obfuscator:
             line += "\n"
 
             if bool(random_bit()):
+
                 self.obfuscated.add_line(
                     f"{self.arra}+={obfuscate_string(line)};"
                 )
 
             else:
-                encoded = xor_string(line, self.xor_key)
-                obfuscated_key = obfuscate_int(self.xor_key)
+
+                encoded = xor_string(line, key := generate_xor_key())
+                obfuscated_key = obfuscate_int(key)
 
                 self.obfuscated.add_line(
                     f"{self.arra}+="
@@ -164,15 +163,16 @@ class Obfuscator:
                     f"for _ in '{encoded}');"
                 )
 
-        code = ""
-        code += self.comp
-        code += "("
-        code += self.arra
-        code += ","
-        code += obfuscate_string("<string>", range=(1, 2))
-        code += ","
-        code += obfuscate_string("exec")
-        code += ")"
+        code = (
+            self.comp
+            + "("
+            + self.arra
+            + ","
+            + obfuscate_string("<string>", range=(1, 2))
+            + ","
+            + obfuscate_string("exec")
+            + ")"
+        )
 
         self.obfuscated.add_line(f"{self.exec}({code})")
 

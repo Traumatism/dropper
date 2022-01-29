@@ -2,6 +2,11 @@ import random
 import base64
 
 
+def generate_xor_key() -> int:
+    """Generate a random xor key"""
+    return random.randint(0, 255)
+
+
 def xor_string(string: str, key: int) -> str:
     """XOR a string with a key"""
     return "".join(chr(ord(char) ^ key) for char in string)

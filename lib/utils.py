@@ -2,6 +2,8 @@ import random
 import base64
 import tokenize
 
+from typing import Union
+
 
 def edit_token(token: tokenize.TokenInfo, string: str) -> tokenize.TokenInfo:
     """ Edit a token """
@@ -40,7 +42,7 @@ def obfuscate_bool(bool_: bool) -> str:
     return f"bool({obfuscate_int(1 if bool_ else 0)})"
 
 
-def random_bit(as_bool: bool = False) -> int | bool:
+def random_bit(as_bool: bool = False) -> Union[int, bool]:
     """ Generate a random bit """
     return bool(random.randint(0, 1)) if as_bool else random.randint(0, 1)
 

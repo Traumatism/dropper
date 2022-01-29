@@ -109,12 +109,12 @@ class Obfuscator:
         self.console.print("Generating template...")
 
         self.obfuscated.add_line(
-            f"{self.eval}=eval({obfuscate_string('eval')});", end=""
+            f"{self.eval}=eval({obfuscate_string('eval')});"
         )
 
         obfuscated_exec = f"{self.eval}({obfuscate_string('exec')})"
 
-        self.obfuscated.add_line(f"{self.exec}={obfuscated_exec};", end="")
+        self.obfuscated.add_line(f"{self.exec}={obfuscated_exec}")
         self.obfuscated.add_line("\n")
 
         self.obfuscated.add_line(
@@ -136,8 +136,7 @@ class Obfuscator:
 
         self.obfuscated.add_line(
             f"{self.splitted}="
-            f"{self.eval}({obfuscate_string('str()', _eval=self.eval)})",
-            end=";"
+            f"{self.eval}({obfuscate_string('str()', _eval=self.eval)})"
         )
 
         parts = map(
@@ -154,7 +153,6 @@ class Obfuscator:
                 f"{self.splitted}+="
                 f"''.join({self.chr}({self.ord}(_)^{obfuscated_key})"
                 f"for(_)in({base64_string(encoded)}));",
-                end=""
             )
 
         code = (

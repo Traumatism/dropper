@@ -50,13 +50,13 @@ class Obfuscator:
 
         self.generated_strings: list[str] = []
 
-        self.eval = self.junk_string(10)
-        self.exec = self.junk_string(10)
-        self.ord = self.junk_string(10)
-        self.chr = self.junk_string(10)
-        self.comp = self.junk_string(10)
-        self.none = self.junk_string(10)
-        self.arra = self.junk_string(10)
+        self.eval = self.junk_string(3)
+        self.exec = self.junk_string(3)
+        self.ord = self.junk_string(3)
+        self.chr = self.junk_string(3)
+        self.comp = self.junk_string(3)
+        self.none = self.junk_string(3)
+        self.arra = self.junk_string(3)
 
         self.obfuscated = Obfuscated()
         self.ident_level: int = 0
@@ -131,6 +131,7 @@ class Obfuscator:
         obfuscated_tokens = self.obfuscate_tokens()
 
         self.console.print("Splitting and re-organizating the code...")
+
         lines = obfuscated_tokens.splitlines()
 
         self.obfuscated.add_line(

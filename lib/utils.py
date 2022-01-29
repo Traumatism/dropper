@@ -45,11 +45,6 @@ def random_bit(as_bool: bool = False) -> int | bool:
     return bool(random.randint(0, 1)) if as_bool else random.randint(0, 1)
 
 
-def docstring(text: str, quote: str = '"') -> str:
-    """ Generate a docstring """
-    return f"{quote*3} {text} {quote*3}"
-
-
 def string_to_hex(string: str) -> str:
     """ Convert a string to hex """
     return "\\x" + "\\x".join(f"{hex(ord(char))[2:]}" for char in string)
@@ -58,11 +53,6 @@ def string_to_hex(string: str) -> str:
 def int_to_hex_or_bin(num: int) -> str:
     """ Convert an integer to hex or binary """
     return hex(num) if random_bit() else bin(num)
-
-
-def int_to_list_of_bits(num: int):
-    """ Convert an integer to a list of bits """
-    return list(map(int, int_to_list_of_bool(num)))
 
 
 def int_to_list_of_bool(num: int) -> list[bool]:
@@ -78,21 +68,21 @@ def int_to_list_of_bool(num: int) -> list[bool]:
     return results
 
 
-def obfuscate_string(string: str, range=(25, 50)) -> str:
+def obfuscate_string(string: str, range=(10, 15)) -> str:
     """ Obfuscate a string """
 
     array = (obfuscate_int(ord(char), range=range) for char in string)
     quote = random.choice(("'", '"'))
 
     obfuscated = "".join(
-        f"eval({quote}{string_to_hex('chr')}{quote})" f"({obf_chr})" "+"
+        f"eval({quote}{string_to_hex('chr')}{quote})({obf_chr})+"
         for obf_chr in array
     )
 
     return obfuscated[:-1]  # Remove the last '+'
 
 
-def obfuscate_int(num: int, range=(50, 100)) -> str:
+def obfuscate_int(num: int, range=(25, 50)) -> str:
     """ Obfuscate an integer """
 
     shift, shift_zero = random.randint(*range), random.randint(*range)

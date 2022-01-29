@@ -79,7 +79,6 @@ class Obfuscator:
             if token.type == 3:
                 key = generate_xor_key()
                 encoded = xor_string(token.string[1:-1], key)
-
                 obfuscated_key = obfuscate_int(key)
 
                 real = (
@@ -143,7 +142,8 @@ class Obfuscator:
         )
 
         for part in parts:
-            encoded = xor_string(part, key := generate_xor_key())
+            key = generate_xor_key()
+            encoded = xor_string(part, key)
 
             obfuscated_key = obfuscate_int(key)
 

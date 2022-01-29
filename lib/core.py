@@ -77,10 +77,8 @@ class Obfuscator:
                 token = edit_token(token, "")
 
             if token.type == 3:
-
-                encoded = xor_string(
-                    token.string[1:-1], key := generate_xor_key()
-                )
+                key = generate_xor_key()
+                encoded = xor_string(token.string[1:-1], key)
 
                 obfuscated_key = obfuscate_int(key)
 

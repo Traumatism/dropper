@@ -160,7 +160,7 @@ class Obfuscator:
                 self.obfuscated.add_line(
                     f"{self.arra}+="
                     f"''.join(chr(ord(_)^{obfuscated_key}) "
-                    f"for _ in '{encoded}');"
+                    f"for _ in {base64_string(encoded)});"
                 )
 
         code = (

@@ -57,19 +57,6 @@ def int_to_hex_or_bin(num: int) -> str:
     return hex(num) if random_bit() else bin(num)
 
 
-def int_to_list_of_bool(num: int) -> list[bool]:
-    """ Convert an integer to a list boolean """
-    if num >= 15:
-        raise ValueError("Integer too large, must be <= 15")
-
-    results = []
-
-    while results.count(True) != num:
-        results.append(bool(random_bit()))
-
-    return results
-
-
 def obfuscate_string(string: str, range=(10, 15), _eval: str = "eval") -> str:
     """ Obfuscate a string """
 

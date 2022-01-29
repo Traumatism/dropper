@@ -1,5 +1,7 @@
 def main(string: str, i: int, boolean: bool = False) -> None:
+    """ Main function """
     for _ in range(i):
+        # dropper test
         print("%s: %s" % (string, boolean))
 
 

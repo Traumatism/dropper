@@ -22,7 +22,7 @@ class Obfuscated:
         self.indent_level: int = 0
         self.__content: str = ""
 
-    def add_line(self, line: str, end=" # /!\\ POWAH OF UWU /!\\\n") -> None:
+    def add_line(self, line: str, end="\n") -> None:
         """Add a line to the code"""
         self.__content += ("    " * self.indent_level) + line + end
 
@@ -54,7 +54,6 @@ class Obfuscator:
         self.arra = self.junk_string(10)
 
         self.obfuscated = Obfuscated()
-        self.ident_level: int = 0
 
     def obfuscate_tokens(self) -> str:
         self.console.print("Tokenizing code...")
@@ -65,7 +64,7 @@ class Obfuscator:
 
         for token in _tokens:
 
-            if token.type == 62:
+            if token.type in (61, 62):
                 continue
 
             if token.type == 3:

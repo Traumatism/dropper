@@ -10,8 +10,7 @@ from .utils import (
     obfuscate_int,
     obfuscate_string,
     xor_string,
-    generate_xor_key,
-    edit_token
+    edit_token,
 )
 
 from rich.console import Console
@@ -48,18 +47,18 @@ class Obfuscator:
 
         self.generated_strings: list[str] = []
 
-        self.eval = self.junk_string(3)
-        self.exec = self.junk_string(3)
-
-        self.comp = self.junk_string(3)
-        self.none = self.junk_string(3)
-
-        self.ord = self.junk_string(3)
-        self.chr = self.junk_string(3)
-
-        self.splitted = self.junk_string(3)
+        self.eval = self.junk_string(5)
+        self.exec = self.junk_string(5)
+        self.comp = self.junk_string(5)
+        self.none = self.junk_string(5)
+        self.ord = self.junk_string(5)
+        self.chr = self.junk_string(5)
+        self.splitted = self.junk_string(5)
+        self.__import__ = self.junk_string(5)
+        self.bool = self.junk_string(5)
 
         self.obfuscated = self.Obfuscated()
+
         self.ident_level: int = 0
 
     def obfuscate_tokens(self) -> str:
@@ -76,25 +75,36 @@ class Obfuscator:
             if token.type in (61, 62):
                 token = edit_token(token, "")
 
-            if token.type == 3:
-                key = generate_xor_key()
-                encoded = xor_string(token.string[1:-1], key)
+            if token.type == tokenize.STRING and token.string.startswith(
+                ("'", "\"")
+            ):
+                key = random.randint(0, 10)
                 obfuscated_key = obfuscate_int(key)
 
+                encoded = xor_string(token.string[1:-1], key)
+                b64_encoded = base64_string(encoded, _import=self.__import__)
+
+                char = random.choice(("a", "b", "c", "ds"))
+
                 real = (
-                    f"(''.join(chr(ord(char)^{obfuscated_key}) "
-                    f"for char in {base64_string(encoded)}))"
+                    f"(''.join(chr(ord({char})^{obfuscated_key})"
+                    f"for({char})in({b64_encoded})))"
                 )
 
                 token = edit_token(token, real)
 
-            if token.type == 2:
+            if token.type == tokenize.NUMBER:
                 token = edit_token(
                     token, obfuscate_int(int(token.string), range=(1, 3))
                 )
 
-            if token.type == 1 and token.string in ("False", "True"):
-                token = edit_token(token, obfuscate_bool(eval(token.string)))
+            if (
+                token.type == tokenize.NAME
+                and token.string in ("False", "True")
+            ):
+                token = edit_token(
+                    token, obfuscate_bool(eval(token.string), _bool=self.bool)
+                )
 
             tokens.append(token)
 
@@ -112,18 +122,20 @@ class Obfuscator:
         obfuscated_exec = f"{self.eval}({obfuscate_string('exec')})"
 
         self.obfuscated.add_line(f"{self.exec}={obfuscated_exec}")
-        self.obfuscated.add_line("\n")
 
         self.obfuscated.add_line(
-            f"{self.none},{self.comp},{self.chr},{self.ord}"
+
+            f"{self.none},{self.comp},{self.chr},"
+            f"{self.ord},{self.__import__},{self.bool}"
+
             "="
-            f"{self.eval}('{string_to_hex('None')}')"
-            ","
-            f"{self.eval}('{string_to_hex('compile')}')"
-            ","
-            f"{self.eval}('{string_to_hex('chr')}')"
-            ","
-            f"{self.eval}('{string_to_hex('ord')}')",
+
+            f"{self.eval}('{string_to_hex('None')}'),"
+            f"{self.eval}('{string_to_hex('compile')}'),"
+            f"{self.eval}('{string_to_hex('chr')}'),"
+            f"{self.eval}('{string_to_hex('ord')}'),"
+            f"{self.eval}('{string_to_hex('__import__')}'),"
+            f"{self.eval}('{string_to_hex('bool')}')",
             end=";"
         )
 
@@ -136,35 +148,32 @@ class Obfuscator:
             f"{self.eval}({obfuscate_string('str()', _eval=self.eval)})"
         )
 
-        parts = map(
-            lambda x: f"{x}\n",
-            obfuscated_tokens.splitlines()
-        )
-
-        for part in parts:
-            key = generate_xor_key()
-            encoded = xor_string(part, key)
+        for part in map(lambda x: f"{x}\n", obfuscated_tokens.splitlines()):
+            key = random.randint(0, 10)
 
             obfuscated_key = obfuscate_int(key)
+            encoded = xor_string(part, key)
+            b64_encoded = base64_string(encoded, _import=self.__import__)
+
+            char = random.choice(("a", "b", "c", "d"))
 
             self.obfuscated.add_line(
                 f"{self.splitted}+="
-                f"''.join({self.chr}({self.ord}(_)^{obfuscated_key})"
-                f"for(_)in({base64_string(encoded)}));",
+                f"''.join({self.chr}({self.ord}({char})^{obfuscated_key})"
+                f"for({char})in({b64_encoded}))",
             )
 
-        code = (
-            self.comp
-            + "("
-            + self.splitted
-            + ","
-            + obfuscate_string("<string>", range=(1, 2))
-            + ","
-            + obfuscate_string("exec")
-            + ")"
+        x = self.junk_string(5)
+
+        self.obfuscated.add_line(
+            f"{x}=["
+            f"{self.splitted},"
+            f"{obfuscate_string('<string>', range=(1, 2))},"
+            f"{obfuscate_string('exec')}"
+            "]"
         )
 
-        self.obfuscated.add_line(f"{self.exec}({code})")
+        self.obfuscated.add_line(f"{self.exec}({self.comp}(*{x}))")
 
     def junk_string(self, length: int = 10, b64: bool = False) -> str:
         """ Generate a random string of a given length """

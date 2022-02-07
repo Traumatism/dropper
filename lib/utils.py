@@ -16,30 +16,25 @@ def edit_token(token: tokenize.TokenInfo, string: str) -> tokenize.TokenInfo:
     )
 
 
-def generate_xor_key() -> int:
-    """ Generate a random xor key """
-    return random.randint(0, 255)
-
-
 def xor_string(string: str, key: int) -> str:
     """ XOR a string with a key """
     return "".join(chr(ord(char) ^ key) for char in string)
 
 
-def base64_string(string: str) -> str:
+def base64_string(string: str, _import: str = "__import__") -> str:
     """ Convert a string to base64 """
     encoded = base64.b64encode(string.encode()).decode()
 
     return (
-        f"__import__('{string_to_hex('base64')}')"
+        f"{_import}('{string_to_hex('base64')}')"
         f".b64decode(b'{string_to_hex(encoded)}')"
         ".decode()"
     )
 
 
-def obfuscate_bool(bool_: bool) -> str:
+def obfuscate_bool(target: bool, _bool: str = "bool") -> str:
     """ Obfuscate a boolean """
-    return f"bool({obfuscate_int(1 if bool_ else 0)})"
+    return f"{_bool}({obfuscate_int(1 if target else 0)})"
 
 
 def random_bit(as_bool: bool = False) -> Union[int, bool]:
@@ -71,15 +66,9 @@ def obfuscate_string(string: str, range=(10, 15), _eval: str = "eval") -> str:
     return obfuscated[:-1]  # Remove the last '+'
 
 
-def obfuscate_int(num: int, range=(25, 50)) -> str:
+def obfuscate_int(num: int, range=(1, 20)) -> str:
     """ Obfuscate an integer """
 
-    shift, shift_zero = random.randint(*range), random.randint(*range)
-    bit = random_bit()
+    shift = random.randint(*range)
 
-    parts = (
-        f"({int_to_hex_or_bin(num << shift)}>>{shift})",
-        f"({int_to_hex_or_bin(1 >> shift_zero)}<<{shift_zero})",
-    )
-
-    return parts[bit] + "+" + parts[not bit]
+    return f"({int_to_hex_or_bin(num << shift)}>>{shift})"

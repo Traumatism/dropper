@@ -10,7 +10,7 @@ from .utils import (
     obfuscate_int,
     obfuscate_string,
     xor_string,
-    edit_token,
+    edit_token
 )
 
 from rich.console import Console
@@ -47,19 +47,12 @@ class Obfuscator:
 
         self.generated_strings: list[str] = []
 
+        self.primary_list = self.junk_string(3)
         self.eval = self.junk_string(5)
         self.exec = self.junk_string(5)
-        self.comp = self.junk_string(5)
-        self.none = self.junk_string(5)
-        self.ord = self.junk_string(5)
-        self.chr = self.junk_string(5)
         self.splitted = self.junk_string(5)
-        self.__import__ = self.junk_string(5)
-        self.bool = self.junk_string(5)
 
         self.obfuscated = self.Obfuscated()
-
-        self.ident_level: int = 0
 
     def obfuscate_tokens(self) -> str:
         self.console.print("Tokenizing code...")
@@ -82,7 +75,7 @@ class Obfuscator:
                 obfuscated_key = obfuscate_int(key)
 
                 encoded = xor_string(token.string[1:-1], key)
-                b64_encoded = base64_string(encoded, _import=self.__import__)
+                b64_encoded = base64_string(encoded, _eval=self.eval)
 
                 char = random.choice(("a", "b", "c", "ds"))
 
@@ -95,7 +88,7 @@ class Obfuscator:
 
             if token.type == tokenize.NUMBER:
                 token = edit_token(
-                    token, obfuscate_int(int(token.string), range=(1, 3))
+                    token, obfuscate_int(int(token.string))
                 )
 
             if (
@@ -111,7 +104,7 @@ class Obfuscator:
         return tokenize.untokenize(tokens)
 
     def obfuscate(self):
-        """Obfuscate the code"""
+        """ Obfuscate the code """
 
         self.console.print("Generating template...")
 
@@ -119,24 +112,33 @@ class Obfuscator:
             f"{self.eval}=eval({obfuscate_string('eval')});"
         )
 
-        obfuscated_exec = f"{self.eval}({obfuscate_string('exec')})"
+        obfuscated_exec = (
+            f"{self.eval}({obfuscate_string('exec', _eval=self.eval)})"
+        )
 
         self.obfuscated.add_line(f"{self.exec}={obfuscated_exec}")
 
         self.obfuscated.add_line(
-
-            f"{self.none},{self.comp},{self.chr},"
-            f"{self.ord},{self.__import__},{self.bool}"
-
-            "="
-
+            f"{self.primary_list}=["
             f"{self.eval}('{string_to_hex('None')}'),"
             f"{self.eval}('{string_to_hex('compile')}'),"
             f"{self.eval}('{string_to_hex('chr')}'),"
             f"{self.eval}('{string_to_hex('ord')}'),"
             f"{self.eval}('{string_to_hex('__import__')}'),"
-            f"{self.eval}('{string_to_hex('bool')}')",
+            f"{self.eval}('{string_to_hex('bool')}')"
+            "]",
             end=";"
+        )
+
+        self.none = f"{self.primary_list}[{obfuscate_int(0)}]"
+        self.compile = f"{self.primary_list}[{obfuscate_int(1)}]"
+        self.chr = f"{self.primary_list}[{obfuscate_int(2)}]"
+        self.ord = f"{self.primary_list}[{obfuscate_int(3)}]"
+        self.__import__ = f"{self.primary_list}[{obfuscate_int(4)}]"
+        self.bool = f"{self.primary_list}[{obfuscate_int(5)}]"
+
+        self.obfuscated.add_line(
+            f"{self.exec}({obfuscate_string('import base64')})"
         )
 
         obfuscated_tokens = self.obfuscate_tokens()
@@ -153,7 +155,7 @@ class Obfuscator:
 
             obfuscated_key = obfuscate_int(key)
             encoded = xor_string(part, key)
-            b64_encoded = base64_string(encoded, _import=self.__import__)
+            b64_encoded = base64_string(encoded, _eval=self.eval)
 
             char = random.choice(("a", "b", "c", "d"))
 
@@ -168,19 +170,21 @@ class Obfuscator:
         self.obfuscated.add_line(
             f"{x}=["
             f"{self.splitted},"
-            f"{obfuscate_string('<string>', range=(1, 2))},"
-            f"{obfuscate_string('exec')}"
+            f"{obfuscate_string('<string>', _eval=self.eval)},"
+            f"{obfuscate_string('exec', _eval=self.eval)}"
             "]"
         )
 
-        self.obfuscated.add_line(f"{self.exec}({self.comp}(*{x}))")
+        self.obfuscated.add_line(f"{self.exec}({self.compile}(*{x}))")
 
     def junk_string(self, length: int = 10, b64: bool = False) -> str:
         """ Generate a random string of a given length """
         string = "".join(random.choice("Il") for _ in range(length))
 
-        if string in self.generated_strings:
-            string = self.junk_string(length, b64)
+        string = (
+            self.junk_string(length, b64)
+            if string in self.generated_strings else string
+        )
 
         self.generated_strings.append(string)
 
@@ -194,20 +198,29 @@ class Obfuscator:
 
         self.console.print("Finalizing with zlib compression...")
 
-        compressed = zlib.compress(self.obfuscated.content.encode())
-
-        final = (
-            "import sys\n"
-            "sys.setrecursionlimit(999999999)\n"
-            "exec("
-            f"__import__('{string_to_hex('zlib')}').decompress({compressed})"
-            ")  # hello from dwoppah"
+        compressed = base64.b64encode(
+            zlib.compress(self.obfuscated.content.encode())
         )
 
-        final_size = len(final)
+        final = '''""" (>,<)/ """
+import zlib, base64
+
+ENCODED = %s
+
+# Decode the encoded string
+COMPRESSED = base64.b64decode(ENCODED)
+
+# Decompress the code
+OBFUSCATED = zlib.decompress(COMPRESSED)
+
+# Execute the code
+exec(OBFUSCATED)
+
+# hello from dwoppah
+        '''[:-9] % compressed
 
         self.console.print(
-            f"Final code size: {final_size:,} "
+            f"Final code size: {len(final):,} "
             "(This is very variable, restart the program to get another size)"
         )
 

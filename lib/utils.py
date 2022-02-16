@@ -8,11 +8,7 @@ from typing import Union
 def edit_token(token: tokenize.TokenInfo, string: str) -> tokenize.TokenInfo:
     """ Edit a token """
     return tokenize.TokenInfo(
-        type=token.type,
-        string=string,
-        start=token.start,
-        end=token.end,
-        line=token.line,
+        token.type, string, token.start, token.end, token.line
     )
 
 
@@ -21,14 +17,13 @@ def xor_string(string: str, key: int) -> str:
     return "".join(chr(ord(char) ^ key) for char in string)
 
 
-def base64_string(string: str, _import: str = "__import__") -> str:
+def base64_string(string: str, _eval: str = "eval") -> str:
     """ Convert a string to base64 """
     encoded = base64.b64encode(string.encode()).decode()
 
     return (
-        f"{_import}('{string_to_hex('base64')}')"
-        f".b64decode(b'{string_to_hex(encoded)}')"
-        ".decode()"
+        f"{_eval}(\"{string_to_hex('base64.b64decode')}\")"
+        f"(b\"{string_to_hex(encoded)}\").decode()"
     )
 
 
@@ -47,28 +42,14 @@ def string_to_hex(string: str) -> str:
     return "\\x" + "\\x".join(f"{hex(ord(char))[2:]}" for char in string)
 
 
-def int_to_hex_or_bin(num: int) -> str:
-    """ Convert an integer to hex or binary """
-    return hex(num) if random_bit() else bin(num)
-
-
-def obfuscate_string(string: str, range=(10, 15), _eval: str = "eval") -> str:
+def obfuscate_string(string: str, _eval: str = "eval") -> str:
     """ Obfuscate a string """
-
-    array = (obfuscate_int(ord(char), range=range) for char in string)
-    quote = random.choice(("'", '"'))
-
-    obfuscated = "".join(
-        f"{_eval}({quote}{string_to_hex('chr')}{quote})({obf_chr})+"
-        for obf_chr in array
-    )
-
-    return obfuscated[:-1]  # Remove the last '+'
+    return "".join(
+        f"{_eval}(\"{string_to_hex('chr')}\")({obf_chr})+"
+        for obf_chr in (obfuscate_int(ord(char)) for char in string)
+    )[:-1]
 
 
-def obfuscate_int(num: int, range=(1, 20)) -> str:
+def obfuscate_int(num: int, shift=random.randint(1, 20)) -> str:
     """ Obfuscate an integer """
-
-    shift = random.randint(*range)
-
-    return f"({int_to_hex_or_bin(num << shift)}>>{shift})"
+    return f"({(num << shift)}>>{shift})"

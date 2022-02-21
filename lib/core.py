@@ -3,7 +3,7 @@ import random
 import base64
 import tokenize
 
-from .utils import (
+from .methods import (
     base64_string,
     string_to_hex,
     obfuscate_bool,
@@ -204,18 +204,13 @@ class Obfuscator:
 
         final = '''""" (>,<)/ """
 import zlib, base64
-
 ENCODED = %s
-
 # Decode the encoded string
 COMPRESSED = base64.b64decode(ENCODED)
-
 # Decompress the code
 OBFUSCATED = zlib.decompress(COMPRESSED)
-
 # Execute the code
 exec(OBFUSCATED)
-
 # hello from dwoppah
         '''[:-9] % compressed
 

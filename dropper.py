@@ -2,12 +2,10 @@ import argparse
 
 from rich.console import Console
 
-from lib.banner import display
 from lib.core import Obfuscator
 
 
 if __name__ == "__main__":
-    display()
 
     parser = argparse.ArgumentParser()
 

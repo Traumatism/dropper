@@ -88,7 +88,7 @@ class Obfuscator:
 
             if token.type == tokenize.NUMBER:
                 token = edit_token(
-                    token, obfuscate_int(int(token.string))
+                    token, obfuscate_int(int(eval(token.string)))
                 )
 
             if (

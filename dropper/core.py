@@ -5,14 +5,25 @@ import random
 import zlib
 import io
 
-from dropper.methods import obfuscate_int, obfuscate_string, obfuscate_boolean
+from rich.console import Console
+
+from dropper.methods import (
+    obfuscate_bytes,
+    obfuscate_int,
+    obfuscate_string,
+    obfuscate_boolean
+)
+
 from dropper.utils import string_to_hex
 
 
 class Dropper:
 
-    def __init__(self, code: str) -> None:
+    def __init__(
+        self, code: str, console: typing.Optional[Console] = None
+    ) -> None:
         self.code = code
+        self.console = console or Console()
 
         self.io = lambda code: io.BytesIO(code.encode("utf-8"))
 
@@ -24,10 +35,10 @@ class Dropper:
 
     def junk_string(self) -> str:
         """ Generate a random string """
-        s = "".join(random.choice("Ii") for _ in range(15))
+        s = f"_{hex(random.getrandbits(16))}"
 
         while s and s in self.junk_strs:
-            s = "".join(random.choice("Ii") for _ in range(15))
+            s = f"_{hex(random.getrandbits(16))}"
 
         self.junk_strs.append(s)
 
@@ -69,22 +80,22 @@ class Dropper:
 
                     _token = next(tokens_iterator)
 
-                    change_obj_name = not (
+                    change_callable_name = not (
                         _token.string.startswith("__")
                         and _token.string.endswith("__")
                     )
 
-                    if change_obj_name:
-                        new_obj_name = self.junk_string()
-                        self.funcs_map[_token.string] = new_obj_name
+                    if change_callable_name:
+                        new_callable_name = self.junk_string()
+                        self.funcs_map[_token.string] = new_callable_name
 
-                    obj_name = (
-                        new_obj_name  # type: ignore
-                        if change_obj_name else _token.string
+                    callable_name = (
+                        new_callable_name  # type: ignore
+                        if change_callable_name else _token.string
                     )
 
                     _type, string, start, end, line = (
-                        _token.type, obj_name,
+                        _token.type, callable_name,
                         _token.start, _token.end, _token.line
                     )
 
@@ -92,19 +103,19 @@ class Dropper:
                 value = eval(string)  # i am not in danger, i am the danger.
                 string = obfuscate_int(value)
 
-            yield tokenize.TokenInfo(
-                type=_type,
-                string=string,
-                start=start,
-                end=end,
-                line=line
-            )
+            yield tokenize.TokenInfo(_type, string, start, end, line)
 
     def obfuscate(self) -> str:
         """ Obfuscate the code """
+        self.console.log(
+            "Obfuscating objects... (functions, classes, strings, ints)"
+        )
+
         self.code = tokenize.untokenize(
             self.obfuscate_tokens()
         ).decode()
+
+        self.console.log("Changing callable calls names...")
 
         tokens = self.tokenize(self.io(self.code))
         tokens_iterator = iter(tokens)
@@ -118,33 +129,58 @@ class Dropper:
                     string = self.funcs_map[string]
 
             final_tokens.append(
-                tokenize.TokenInfo(
-                    type=_type,
-                    string=string,
-                    start=start,
-                    end=end,
-                    line=line
-                )
+                tokenize.TokenInfo(_type, string, start, end, line)
             )
 
         obfuscated = tokenize.untokenize(final_tokens)
+
+        self.console.log("Compressing code...")
         compressed = zlib.compress(obfuscated, 9)
 
+        _eval = self.junk_string()
+        _bytes = self.junk_string()
+        _chr = self.junk_string()
+        _l = self.junk_string()
+
+        self.console.log("Generating final code...")
+
         self.code = ""
+
         self.code += f"""
-_ = (
-    (e:=eval),
-    '{string_to_hex('compile')}',
-    e('{string_to_hex('__import__')}'),
-    '{string_to_hex('zlib')}'
+{_eval},{_chr},{_bytes} = (
+    eval({obfuscate_string('eval')}),
+    eval({obfuscate_string('chr')}),
+    eval({obfuscate_string('bytes')})
 )
 
-_[{obfuscate_int(0)}](_[{obfuscate_int(0)}](_[{obfuscate_int(1)}])(
-    _[{obfuscate_int(2)}](_[{obfuscate_int(3)}])
-    .decompress({compressed})
-    .decode(),
+{_l} = (
+    {_eval},
+    {obfuscate_string('compile', chr_func=_chr)},
+    {_eval}({obfuscate_string('__import__', chr_func=_chr)}),
+    {obfuscate_string('zlib', chr_func=_chr)},
+    {obfuscate_bytes(compressed, bytes_func=_bytes)},
+)
+
+del {_eval}, {_chr}, {_bytes}
+
+
+{(options := self.junk_string())}=lambda:(
     '{string_to_hex('<string>')}', '{string_to_hex('exec')}'
-))
+)
+
+{(decode := self.junk_string())}=lambda {(data:=self.junk_string())}:(
+    {_l}[{obfuscate_int(2)}]({_l}[{obfuscate_int(3)}]).decompress({data}).decode()
+)
+
+
+(lambda {(r:=self.junk_string())}:(
+    {_l}[{obfuscate_int(0)}]({_l}[{obfuscate_int(0)}]({_l}[{obfuscate_int(1)}])(
+        {decode}({_l}[({obfuscate_int(4)})or({r})]), *{options}()
+    ))
+))({_l})
 
 """
+
+        self.console.log("Done!")
+
         return self.code

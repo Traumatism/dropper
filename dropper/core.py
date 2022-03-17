@@ -204,6 +204,11 @@ class Dropper:
 
         self.code = ""
         self.code += f"""
+import sys
+
+sys.setrecursionlimit(999999999)
+
+
 {self._eval},{self._chr},{self._bytes},{self._bool} = (
     eval({obfuscate_string('eval')}),
     eval({obfuscate_string('chr')}),

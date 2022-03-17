@@ -33,6 +33,11 @@ class Dropper:
 
         self.junk_strs, self.funcs_map = [], {}
 
+        self._eval = self.junk_string()
+        self._bool = self.junk_string()
+        self._bytes = self.junk_string()
+        self._chr = self.junk_string()
+
     def junk_string(self) -> str:
         """ Generate a random string """
         s = f"_{hex(random.getrandbits(16))}"
@@ -58,7 +63,7 @@ class Dropper:
 
                 if string.startswith(("'", "\"")):
                     """ Normal string """
-                    string = obfuscate_string(string[1:-1])
+                    string = obfuscate_string(string[1:-1], self._chr)
 
                 elif string.startswith(("r'", "r\"")):
                     """ Raw strings """
@@ -67,13 +72,16 @@ class Dropper:
                         .replace("\\", "\\\\")
                         .replace("'", "\\'")
                         .replace('"', '\\"')
-                        [2:-1]
+                        [2:-1],
+                        self._chr
                     )
 
             if _type == token.NAME:
 
                 if string in ("True", "False"):
-                    string = obfuscate_boolean(eval(string))
+                    string = obfuscate_boolean(
+                        eval(string), self._bool
+                    )
 
                 if string in ("def", "class"):
                     yield _token
@@ -124,9 +132,8 @@ class Dropper:
         for _token in tokens_iterator:
             _type, string, start, end, line = _token
 
-            if _type == token.NAME:
-                if string in self.funcs_map:
-                    string = self.funcs_map[string]
+            if _type == token.NAME and string in self.funcs_map:
+                string = self.funcs_map[string]
 
             final_tokens.append(
                 tokenize.TokenInfo(_type, string, start, end, line)
@@ -135,33 +142,29 @@ class Dropper:
         obfuscated = tokenize.untokenize(final_tokens)
 
         self.console.log("Compressing code...")
-        compressed = zlib.compress(obfuscated, 9)
 
-        _eval = self.junk_string()
-        _bytes = self.junk_string()
-        _chr = self.junk_string()
-        _l = self.junk_string()
+        compressed = zlib.compress(obfuscated, 9)
 
         self.console.log("Generating final code...")
 
-        self.code = ""
+        _l = self.junk_string()
 
+        self.code = ""
         self.code += f"""
-{_eval},{_chr},{_bytes} = (
+{self._eval},{self._chr},{self._bytes},{self._bool} = (
     eval({obfuscate_string('eval')}),
     eval({obfuscate_string('chr')}),
-    eval({obfuscate_string('bytes')})
+    eval({obfuscate_string('bytes')}),
+    eval({obfuscate_string('bool')})
 )
 
 {_l} = (
-    {_eval},
-    {obfuscate_string('compile', chr_func=_chr)},
-    {_eval}({obfuscate_string('__import__', chr_func=_chr)}),
-    {obfuscate_string('zlib', chr_func=_chr)},
-    {obfuscate_bytes(compressed, bytes_func=_bytes)},
+    {self._eval},
+    {obfuscate_string('compile', chr_func=self._chr)},
+    {self._eval}({obfuscate_string('__import__', chr_func=self._chr)}),
+    {obfuscate_string('zlib', chr_func=self._chr)},
+    {obfuscate_bytes(compressed, bytes_func=self._bytes)},
 )
-
-del {_eval},{_chr},{_bytes}
 
 {(options := self.junk_string())}=lambda {(s:=self.junk_string())}:(
     '{string_to_hex('<string>')}', '{string_to_hex('exec')}', {s}

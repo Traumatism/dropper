@@ -1,4 +1,5 @@
 obf_*
+priv_*
 test/*
 
 # Byte-compiled / optimized / DLL files

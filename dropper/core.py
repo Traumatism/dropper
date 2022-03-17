@@ -204,11 +204,6 @@ class Dropper:
 
         self.code = ""
         self.code += f"""
-import sys
-
-sys.setrecursionlimit(999999999)
-
-
 {self._eval},{self._chr},{self._bytes},{self._bool} = (
     eval({obfuscate_string('eval')}),
     eval({obfuscate_string('chr')}),
@@ -232,6 +227,9 @@ sys.setrecursionlimit(999999999)
     {_l}[{obfuscate_int(2)}]({_l}[{obfuscate_int(3)}]).decompress({data}).decode()
 )
 
+{_l}[{obfuscate_int(2)}]('{string_to_hex("sys")}').setrecursionlimit(
+    {obfuscate_int(999999999)}
+)
 
 (lambda {(r:=self.junk_string())}:(
     {_l}[{obfuscate_int(0)}]({_l}[{obfuscate_int(0)}]({_l}[{obfuscate_int(1)}])(

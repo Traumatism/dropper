@@ -1,9 +1,10 @@
-import random
+import secrets
 
 
 def obfuscate_int(value: int) -> str:
     """ Obfuscate an integer value """
-    shift = random.randint(0, 100)
+    sys_ran = secrets.SystemRandom()
+    shift = sys_ran.randint(0, 100)
     return f"{hex(value ^ shift)}^{hex(shift)}"
 
 

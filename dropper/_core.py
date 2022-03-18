@@ -10,7 +10,7 @@ from token import NAME, STRING, NUMBER
 from tokenize import untokenize, TokenInfo
 
 from rich.panel import Panel
-from rich.table import Table  # type: ignore
+from rich.table import Table
 from rich.console import Console
 
 from ._methods import (
@@ -132,7 +132,7 @@ class Dropper:
                         token.type, name, token.start, token.end, token.line
                     )
 
-            if _type == NUMBER:
+            if _type == NUMBER and string.isdigit():
                 string = obfuscate_int(eval(string))
 
             yield TokenInfo(_type, string, start, end, line)

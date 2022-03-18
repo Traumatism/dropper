@@ -25,3 +25,7 @@ def function(a: int, x: int) -> int:
 
 print("this is a string")
 print(b"this is bytes")
+print("this is a float", 0.001)
+print("this is a bool", True)
+print("this is a 2nd bool", False)
+print("this is a function call", function(2, 3))

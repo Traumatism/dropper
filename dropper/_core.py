@@ -1,3 +1,4 @@
+import hashlib
 import secrets
 import zlib
 import time
@@ -146,7 +147,7 @@ class Dropper:
 
         _l = self.junk_string()
 
-        return f"""
+        tmp = f"""
 
 {self._eval},{self._chr},{self._bytes},{self._bool} = (
     eval({obfuscate_string('eval')}),
@@ -181,9 +182,30 @@ class Dropper:
     {r}[{obfuscate_int(0)}]({_l}[{obfuscate_int(0)}]({r}[{obfuscate_int(1)}])(
         {decode}({r}[{obfuscate_int(4)}]),*{options}({options})[:{obfuscate_int(-1)}]
     ))
-))({_l})
+))({_l})"""
 
-        """
+        md5sum = hashlib.md5(tmp.encode()).hexdigest()
+
+        _code = f"""
+(lambda {(r := self.junk_string())}: exec(
+    {obfuscate_string('raise ValueError("Never gonna give u up")')}
+    if (
+        __import__({obfuscate_string('hashlib')})
+        .md5(
+            open(__file__)
+            .read()
+            .split('{string_to_hex("# hello from dwoppah")}')
+            [{obfuscate_int(1)}].encode()
+        )
+        .hexdigest()
+        != "{string_to_hex(md5sum)}"
+    ) else ("..." or {r})
+))("{secrets.randbits(64)}") """
+
+        _code += "# hello from dwoppah"
+        _code += tmp
+
+        return _code
 
     def __obfuscate(self) -> None:
         """ Obfuscate the code """

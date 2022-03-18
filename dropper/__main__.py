@@ -17,24 +17,24 @@ def main(
         metavar="<value>", min=4, max=32
     ),
     obfuscate_bools: bool = typer.Option(
-        True, "--obfuscate-bools", "-b",
-        help="Obfuscate boolean values",
-        flag_value=True
+        True, "-nB",
+        help="Don't obfuscate boolean values",
+        flag_value=True, show_default=False
     ),
     obfuscate_ints: bool = typer.Option(
-        True, "--obfuscate-ints", "-i",
-        help="Obfuscate integer values",
-        flag_value=True
+        True, "-nI",
+        help="Don't obfuscate integer values",
+        flag_value=True, show_default=False
     ),
     obfuscate_strings: bool = typer.Option(
-        True, "--obfuscate-strings", "-s",
-        help="Obfuscate string values",
-        flag_value=True
+        True, "-nS",
+        help="Don't obfuscate string values",
+        flag_value=True, show_default=False
     ),
     obfuscate_names: bool = typer.Option(
-        True, "--obfuscate-names", "-n",
-        help="Obfuscate function names",
-        flag_value=True
+        True, "-nN",
+        help="Don't obfuscate function names",
+        flag_value=True, show_default=False
     ),
     verbose: bool = typer.Option(
         False, "--verbose", "-v",
@@ -56,10 +56,10 @@ by @toastakerman
         code,
         verbose=verbose,
         junk_strings_lenght=junk_strings_len,
-        obfuscate_bools=obfuscate_bools,
-        obfuscate_ints=obfuscate_ints,
-        obfuscate_strings=obfuscate_strings,
-        obfuscate_names=obfuscate_names
+        obfuscate_bools=not obfuscate_bools,
+        obfuscate_ints=not obfuscate_ints,
+        obfuscate_strings=not obfuscate_strings,
+        obfuscate_names=not obfuscate_names
     ).obfuscate()
 
     with open(f"obf_{file_path}", "w") as f:

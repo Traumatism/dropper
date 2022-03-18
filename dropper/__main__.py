@@ -56,10 +56,10 @@ by @toastakerman
         code,
         verbose=verbose,
         junk_strings_lenght=junk_strings_len,
-        obfuscate_bools=not obfuscate_bools,
-        obfuscate_ints=not obfuscate_ints,
-        obfuscate_strings=not obfuscate_strings,
-        obfuscate_names=not obfuscate_names
+        obfuscate_bools=obfuscate_bools,
+        obfuscate_ints=obfuscate_ints,
+        obfuscate_strings=obfuscate_strings,
+        obfuscate_names=obfuscate_names
     ).obfuscate()
 
     with open(f"obf_{file_path}", "w") as f:

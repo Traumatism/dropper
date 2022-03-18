@@ -184,20 +184,17 @@ class Dropper:
     ))
 ))({_l})"""
 
-        md5sum = hashlib.md5(tmp.encode()).hexdigest()
+        md5sum = hashlib.md5(tmp.encode()).digest()
 
-        _code = f"""
-(lambda {(r := self.junk_string())}: exec(
-    {obfuscate_string('raise ValueError("Never gonna give u up")')}
-    if (
-        __import__({obfuscate_string('hashlib')}).md5(
-            open(__file__).read().split(
-                '{string_to_hex("# hello from dwoppah")}'
-            )[{obfuscate_int(1)}].encode()
-        ).hexdigest() != "{string_to_hex(md5sum)}"
-    ) else ("..." or {r})
-))("{secrets.randbits(64)}") """
-
+        _code = f"(lambda {(r := self.junk_string())}: (eval("
+        _code += obfuscate_string('exit()')
+        _code += ")if("
+        _code += f"__import__('{string_to_hex('hashlib')}').md5("
+        _code += f"open((e:=eval)('{string_to_hex('__file__')}'))"
+        _code += f".read().split('{string_to_hex('# hello from dwoppah')}')"
+        _code += f"[{obfuscate_int(1)}].encode()).digest()!={md5sum}"
+        _code += f")else(e('{string_to_hex('None')}')or({r}))"
+        _code += f"))('{secrets.randbits(64)}')\n\n"
         _code += "# hello from dwoppah"
         _code += tmp
 

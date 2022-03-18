@@ -26,11 +26,11 @@ from ._utils import string_to_hex, io_to_tokens
 
 
 class Dropper:
+    """ Dropper core """
 
     def __init__(
         self,
         code: str,
-        verbose: bool = False,
         junk_strings_lenght: int = 16,
         obfuscate_bools: bool = True,
         obfuscate_ints: bool = True,
@@ -42,7 +42,7 @@ class Dropper:
         self.junk_strings_lenght = junk_strings_lenght
 
         self.code = code
-        self.verbose = verbose
+
         self.obfuscate_bools = obfuscate_bools
         self.obfuscate_ints = obfuscate_ints
         self.obfuscate_strings = obfuscate_strings
@@ -50,39 +50,38 @@ class Dropper:
 
         self.console = console or Console()
 
-        self.junk_strs, self.funcs_map = [], {}
+        self.junk_strs = []
+        self.funcs_map = {}
 
         self._eval = self.junk_string()
         self._bool = self.junk_string()
         self._bytes = self.junk_string()
         self._chr = self.junk_string()
 
-        if self.verbose:
-            table = Table(title="Built-ins")
-            table.add_column("Name", justify="left")
-            table.add_column("New name", justify="left")
-            table.add_column("Description", justify="left")
+        table = Table(title="Built-ins")
 
-            table.add_row(
-                "chr(...)", f"{self._chr}(...)",
-                "Translate a character to its ASCII code"
-            )
+        table.add_column("Name", justify="left")
+        table.add_column("New name", justify="left")
+        table.add_column("Description", justify="left")
 
-            table.add_row(
-                "eval(...)", f"{self._eval}(...)",
-                "Evaluate a Python expression"
-            )
-            table.add_row(
-                "bool(...)", f"{self._bool}(...)",
-                "Convert a value to a boolean"
-            )
+        table.add_row(
+            "chr(...)", f"{self._chr}(...)",
+            "Translate a character to its ASCII code"
+        )
 
-            table.add_row(
-                "bytes(...)", f"{self._bytes}(...)",
-                "Convert a string to a bytes object"
-            )
+        table.add_row(
+            "eval(...)", f"{self._eval}(...)", "Evaluate a Python expression"
+        )
+        table.add_row(
+            "bool(...)", f"{self._bool}(...)", "Convert a value to a boolean"
+        )
 
-            self.console.log(Panel.fit(table))
+        table.add_row(
+            "bytes(...)", f"{self._bytes}(...)",
+            "Convert a string to a bytes object"
+        )
+
+        self.console.log(Panel.fit(table))
 
     def junk_string(self) -> str:
         """ Generate a random string """
@@ -105,9 +104,12 @@ class Dropper:
         for token in iterator:
             _type, string, start, end, line = token
 
-            if _type == STRING and self.obfuscate_strings:
-                if string.startswith(("'", "\"")):
-                    string = obfuscate_string(string[1:-1], self._chr)
+            if (
+                _type == STRING
+                and self.obfuscate_strings
+                and string.startswith(("'", "\""))
+            ):
+                string = obfuscate_string(string[1:-1], self._chr)
 
             if _type == NAME:
 
@@ -137,6 +139,7 @@ class Dropper:
             if _type == NUMBER:
                 if string.isdigit():
                     string = obfuscate_int(eval(string))
+
                 elif "." in string:
                     string = obfuscate_float(eval(string))
 
@@ -233,16 +236,15 @@ class Dropper:
 
         self.code = self.finalize(compressed)
 
-        if self.verbose:
-            table = Table(title="Functions & classes")
+        table = Table(title="Functions & classes")
 
-            table.add_column("Name")
-            table.add_column("New name")
+        table.add_column("Name")
+        table.add_column("New name")
 
-            for name, new_name in self.funcs_map.items():
-                table.add_row(f"{name}(...)", f"{new_name}(...)")
+        for name, new_name in self.funcs_map.items():
+            table.add_row(f"{name}(...)", f"{new_name}(...)")
 
-            self.console.log(Panel.fit(table))
+        self.console.log(Panel.fit(table))
 
     def obfuscate(self) -> str:
         """ Obfuscate the code """

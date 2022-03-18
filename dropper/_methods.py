@@ -26,10 +26,11 @@ def obfuscate_boolean(value: bool, bool_func: str = "bool") -> str:
 
 def obfuscate_string(value: str, chr_func: str = "chr") -> str:
     """ Obfuscate a string value """
-    return (
-        "(%s)"
-        % "+".join(f"{chr_func}({obfuscate_int(ord(char))})" for char in value)
+    value = "+".join(
+        f"{chr_func}({obfuscate_int(ord(char))})" for char in value
     )
+
+    return f"({value})"
 
 
 def obfuscate_bytes(value: bytes, bytes_func: str = "bytes") -> str:

@@ -1,7 +1,7 @@
 import tokenize
 import token
 import typing
-import random
+import secrets
 import zlib
 import io
 
@@ -87,10 +87,10 @@ class Dropper:
     def junk_string(self) -> str:
         """ Generate a random string """
 
-        s = f"_{hex(random.getrandbits(self.junk_strings_lenght))}"
+        s = f"_{hex(secrets.randbits(self.junk_strings_lenght))}"
 
         while not s and s in self.junk_strs:
-            s = f"_{hex(random.getrandbits(self.junk_strings_lenght))}"
+            s = f"_{hex(secrets.randbits(self.junk_strings_lenght))}"
 
         self.junk_strs.append(s)
 

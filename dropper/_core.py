@@ -16,6 +16,7 @@ from rich.console import Console
 from ._methods import (
     obfuscate_bytes,
     obfuscate_int,
+    obfuscate_float,
     obfuscate_string,
     obfuscate_boolean
 )
@@ -132,8 +133,11 @@ class Dropper:
                         token.type, name, token.start, token.end, token.line
                     )
 
-            if _type == NUMBER and string.isdigit():
-                string = obfuscate_int(eval(string))
+            if _type == NUMBER:
+                if string.isdigit():
+                    string = obfuscate_int(eval(string))
+                elif "." in string:
+                    string = obfuscate_float(eval(string))
 
             yield TokenInfo(_type, string, start, end, line)
 

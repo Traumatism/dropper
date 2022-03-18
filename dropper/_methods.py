@@ -6,6 +6,12 @@ import secrets
 system = secrets.SystemRandom()
 
 
+def obfuscate_float(value: float) -> str:
+    """ Obfuscate a float value """
+    unit, sec = map(int, str(value).split("."))
+    return f"(({obfuscate_int(unit)})+.{sec})"
+
+
 def obfuscate_int(value: int) -> str:
     """ Obfuscate an integer value """
     shift = system.randint(0, 100)

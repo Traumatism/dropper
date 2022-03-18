@@ -20,7 +20,8 @@ class Foo:
 
 
 def function(a: int, x: int) -> int:
-    return function(a - 1, x**2) if a > 0 else x
+    """ This is a function """
+    return a + x
 
 
 print("this is a string")

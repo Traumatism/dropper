@@ -190,15 +190,11 @@ class Dropper:
 (lambda {(r := self.junk_string())}: exec(
     {obfuscate_string('raise ValueError("Never gonna give u up")')}
     if (
-        __import__({obfuscate_string('hashlib')})
-        .md5(
-            open(__file__)
-            .read()
-            .split('{string_to_hex("# hello from dwoppah")}')
-            [{obfuscate_int(1)}].encode()
-        )
-        .hexdigest()
-        != "{string_to_hex(md5sum)}"
+        __import__({obfuscate_string('hashlib')}).md5(
+            open(__file__).read().split(
+                '{string_to_hex("# hello from dwoppah")}'
+            )[{obfuscate_int(1)}].encode()
+        ).hexdigest() != "{string_to_hex(md5sum)}"
     ) else ("..." or {r})
 ))("{secrets.randbits(64)}") """
 

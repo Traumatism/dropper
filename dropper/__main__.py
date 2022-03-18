@@ -1,6 +1,6 @@
 import typer
 
-from .core import Dropper
+from ._core import Dropper
 
 
 def main(

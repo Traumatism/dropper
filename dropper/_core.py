@@ -15,7 +15,6 @@ from rich.table import Table
 from rich.console import Console
 
 from ._methods import (
-    obfuscate_bytes,
     obfuscate_int,
     obfuscate_float,
     obfuscate_string,
@@ -129,8 +128,9 @@ class Dropper:
                     name = token.string
 
                     if change_callable_name:
-                        name = self.junk_string()
-                        self.funcs_map[token.string] = name
+                        self.funcs_map[token.string] = (
+                            name := self.junk_string()
+                        )
 
                     _type, string, start, end, line = (
                         token.type, name, token.start, token.end, token.line
@@ -151,39 +151,49 @@ class Dropper:
         _l = self.junk_string()
 
         tmp = f"""
+# {secrets.token_hex(64)}
+{self._eval} = eval({obfuscate_string("eval")})
 
-{self._eval},{self._chr},{self._bytes},{self._bool} = (
-    eval({obfuscate_string('eval')}),
-    eval({obfuscate_string('chr')}),
-    eval({obfuscate_string('bytes')}),
-    eval({obfuscate_string('bool')})
+# {secrets.token_hex(64)}
+{self._chr},{self._bytes},{self._bool} = (
+    {self._eval}({obfuscate_string("chr")}),
+    {self._eval}({obfuscate_string("bytes")}),
+    {self._eval}({obfuscate_string("bool")})
 )
 
+# {secrets.token_hex(64)}
 {_l} = (
     {self._eval},
-    {obfuscate_string('compile', chr_func=self._chr)},
-    {self._eval}({obfuscate_string('__import__', chr_func=self._chr)}),
-    {obfuscate_string('zlib', chr_func=self._chr)},
-    {obfuscate_bytes(code, bytes_func=self._bytes)},
+    {obfuscate_string("compile", self._chr)},
+    {self._eval}({obfuscate_string("__import__", self._chr)}),
+    {obfuscate_string("zlib", self._chr)},
+    {list(code)},
+    {obfuscate_string("sys", self._chr)},
+    {obfuscate_string("<string>", self._chr)},
+    {obfuscate_string("exec", self._chr)}
 )
 
-{(options := self.junk_string())} = lambda {(s:=self.junk_string())}: (
-    '{string_to_hex('<string>')}', '{string_to_hex('exec')}', {s}
+# {secrets.token_hex(64)}
+{(options := self.junk_string())} = lambda {(a:=self.junk_string())}: (
+    {a}[{obfuscate_int(6)}], {a}[{obfuscate_int(7)}]
 )
 
-{(decode := self.junk_string())} = lambda {(data:=self.junk_string())}: (
-    {_l}[{obfuscate_int(2)}]({_l}[{obfuscate_int(3)}]).decompress({data}).decode()
+# {secrets.token_hex(64)}
+{(decode := self.junk_string())} = lambda {(a:=self.junk_string())}: (
+    {a}[{obfuscate_int(2)}]({a}[{obfuscate_int(3)}])
+    .decompress({self._bytes}({a}[{obfuscate_int(4)}])).decode()
 )
 
-(lambda {(r:=self.junk_string())}: (
-    {r}[{obfuscate_int(2)}]('{string_to_hex("sys")}').setrecursionlimit(
-        {obfuscate_int(999999999)}
-    ))
-)({_l})
+# {secrets.token_hex(64)}
+(lambda {(a:=self.junk_string())}: (
+    {a}[{obfuscate_int(2)}]({a}[{obfuscate_int(5)}])
+    .setrecursionlimit({obfuscate_int(999999999)})
+))({_l})
 
-(lambda {(r:=self.junk_string())}: (
-    {r}[{obfuscate_int(0)}]({_l}[{obfuscate_int(0)}]({r}[{obfuscate_int(1)}])(
-        {decode}({r}[{obfuscate_int(4)}]),*{options}({options})[:{obfuscate_int(-1)}]
+# {secrets.token_hex(64)}
+(lambda {(a:=self.junk_string())}: (
+    {a}[{obfuscate_int(0)}]({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(1)}])(
+        {decode}({a}), *{options}({a})
     ))
 ))({_l})"""
 
@@ -196,7 +206,7 @@ class Dropper:
         _code += f"open((e:=eval)('{string_to_hex('__file__')}'))"
         _code += f".read().split('{string_to_hex('# hello from dwoppah')}')"
         _code += f"[{obfuscate_int(1)}].encode()).digest()!={md5sum}"
-        _code += f")else(e('{string_to_hex('None')}')or({r}))"
+        _code += f") else (e('{string_to_hex('None')}') or {r})"
         _code += f"))('{secrets.randbits(64)}')\n\n"
         _code += "# hello from dwoppah"
         _code += tmp

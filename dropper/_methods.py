@@ -31,13 +31,3 @@ def obfuscate_string(value: str, chr_func: str = "chr") -> str:
     )
 
     return f"({value})"
-
-
-def obfuscate_bytes(value: bytes, bytes_func: str = "bytes") -> str:
-    """ Obfuscate a bytes value """
-    final = f"{bytes_func}(["
-
-    for byte in value:
-        final += f"{byte},"
-
-    return f'{final[:-1]}])'

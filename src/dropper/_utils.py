@@ -10,11 +10,9 @@ def string_to_hex(value: str) -> str:
 
 
 @overload
-def io_to_tokens(io: BytesIO, _iter: Literal[True]) -> Iterator[TokenInfo]: ...
-
-
+def io_to_tokens(io, _iter: Literal[True]) -> Iterator[TokenInfo]: ...
 @overload
-def io_to_tokens(io: BytesIO, _iter: Literal[False]) -> List[TokenInfo]: ...
+def io_to_tokens(io, _iter: Literal[False]) -> List[TokenInfo]: ...
 
 
 def io_to_tokens(

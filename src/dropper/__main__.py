@@ -55,9 +55,7 @@ by @toastakerman
     ).obfuscate()
 
     output_file = (
-        f"obf_{file_path}"
-        if "/" not in file_path
-        and "\\" not in file_path
+        f"obf_{file_path}" if "/" not in file_path and "\\" not in file_path
         else f"obf_{file_path.split(os.path.sep)[-1]}"
     )
 

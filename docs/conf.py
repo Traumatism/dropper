@@ -7,6 +7,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import contextlib
 import os
 import sys
 import shutil
@@ -28,22 +29,19 @@ sys.path.insert(0, os.path.join(__location__, "../src"))
 # setup.py install" in the RTD Advanced Settings.
 # Additionally it helps us to avoid running apidoc manually
 
-try:  # for Sphinx >= 1.7
-    from sphinx.ext import apidoc
-except ImportError:
-    from sphinx import apidoc
+from sphinx.ext import apidoc
+
 
 output_dir = os.path.join(__location__, "api")
 module_dir = os.path.join(__location__, "../src/dropper")
-try:
+with contextlib.suppress(FileNotFoundError):
     shutil.rmtree(output_dir)
-except FileNotFoundError:
-    pass
-
 try:
     import sphinx
 
-    cmd_line = f"sphinx-apidoc --implicit-namespaces -f -o {output_dir} {module_dir}"
+    cmd_line = (
+        f"sphinx-apidoc --implicit-namespaces -f -o {output_dir} {module_dir}"
+    )
 
     args = cmd_line.split(" ")
     if tuple(sphinx.__version__.split(".")) >= ("1", "7"):
@@ -125,7 +123,9 @@ except ImportError:
     version = ""
 
 if not version or version.lower() == "unknown":
-    version = os.getenv("READTHEDOCS_VERSION", "unknown")  # automatically set by RTD
+    version = os.getenv(
+        "READTHEDOCS_VERSION", "unknown"
+    )  # automatically set by RTD
 
 release = version
 
@@ -179,10 +179,7 @@ html_theme = "alabaster"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    "sidebar_width": "300px",
-    "page_width": "1200px"
-}
+html_theme_options = {"sidebar_width": "300px", "page_width": "1200px"}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
@@ -291,10 +288,10 @@ latex_documents = [
 # latex_domain_indices = True
 
 # -- External mapping --------------------------------------------------------
-python_version = ".".join(map(str, sys.version_info[0:2]))
+python_version = ".".join(map(str, sys.version_info[:2]))
 intersphinx_mapping = {
     "sphinx": ("https://www.sphinx-doc.org/en/master", None),
-    "python": ("https://docs.python.org/" + python_version, None),
+    "python": (f"https://docs.python.org/{python_version}", None),
     "matplotlib": ("https://matplotlib.org", None),
     "numpy": ("https://numpy.org/doc/stable", None),
     "sklearn": ("https://scikit-learn.org/stable", None),
@@ -303,5 +300,6 @@ intersphinx_mapping = {
     "setuptools": ("https://setuptools.pypa.io/en/stable/", None),
     "pyscaffold": ("https://pyscaffold.org/en/stable", None),
 }
+
 
 print(f"loading configurations for {project} {version} ...", file=sys.stderr)

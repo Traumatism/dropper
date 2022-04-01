@@ -5,7 +5,7 @@ import time
 
 from io import BytesIO
 
-from typing import Optional, Generator
+from typing import Dict, List, Optional, Generator
 
 from token import NAME, STRING, NUMBER
 from tokenize import untokenize, TokenInfo
@@ -49,13 +49,14 @@ class Dropper:
 
         self.console = console or Console()
 
-        self.junk_strs = []
-        self.funcs_map = {}
+        self.junk_strs: List[int] = []
+        self.funcs_map: Dict[str, str] = {}
 
         self._eval = self.junk_string()
         self._bool = self.junk_string()
         self._bytes = self.junk_string()
         self._chr = self.junk_string()
+        self._map = self.junk_string()
 
         table = Table(title="Built-ins")
 
@@ -147,44 +148,56 @@ class Dropper:
 
     def finalize(self, code: bytes) -> str:
         """ Finalize the obfuscation """
+        _i = list(map(
+            lambda k: f"({obfuscate_int(k ^ 1)})", list(code))
+        )
 
         _l = self.junk_string()
 
+        _l_content = map(str, (
+            self._eval,
+            obfuscate_string("compile", self._chr),
+            f"{self._eval}({obfuscate_string('__import__', self._chr)})",
+            obfuscate_string("zlib", self._chr),
+            f"{self._map}({self._eval},{_i})",
+            obfuscate_string("sys", self._chr),
+            obfuscate_string("<string>", self._chr),
+            obfuscate_string("exec", self._chr)
+        ))
+
+        _m = f"{self._chr},{self._bytes},{self._bool},{self._map}"
+
+        _m_content = (
+            f"{self._eval}({obfuscate_string('chr')})",
+            f"{self._eval}({obfuscate_string('bytes')})",
+            f"{self._eval}({obfuscate_string('bool')})",
+            f"{self._eval}({obfuscate_string('map')})"
+        )
+
         tmp = f"""
-# {secrets.token_hex(64)}
 {self._eval} = eval({obfuscate_string("eval")})
 
-# {secrets.token_hex(64)}
-{self._chr},{self._bytes},{self._bool} = (
-    {self._eval}({obfuscate_string("chr")}),
-    {self._eval}({obfuscate_string("bytes")}),
-    {self._eval}({obfuscate_string("bool")})
-)
+{_m}=({",".join(_m_content)})
+{_l}=({",".join(_l_content)})
 
-# {secrets.token_hex(64)}
-{_l} = (
-    {self._eval},
-    {obfuscate_string("compile", self._chr)},
-    {self._eval}({obfuscate_string("__import__", self._chr)}),
-    {obfuscate_string("zlib", self._chr)},
-    {list(code)},
-    {obfuscate_string("sys", self._chr)},
-    {obfuscate_string("<string>", self._chr)},
-    {obfuscate_string("exec", self._chr)}
-)
-
-# {secrets.token_hex(64)}
-{(options := self.junk_string())} = lambda {(a:=self.junk_string())}: (
+{(options := self.junk_string())}=lambda {(a:=self.junk_string())}:(
     {a}[{obfuscate_int(6)}], {a}[{obfuscate_int(7)}]
 )
 
-# {secrets.token_hex(64)}
-{(decode := self.junk_string())} = lambda {(a:=self.junk_string())}: (
-    {a}[{obfuscate_int(2)}]({a}[{obfuscate_int(3)}])
-    .decompress({self._bytes}({a}[{obfuscate_int(4)}])).decode()
+{(decode_f := self.junk_string())}=lambda {(a:=self.junk_string())}:(
+    {a}^{obfuscate_int(1)}
 )
 
-# {secrets.token_hex(64)}
+{(decode := self.junk_string())}=lambda {(a:=self.junk_string())}: (
+    {a}[{obfuscate_int(2)}]({a}[{obfuscate_int(3)}])
+    .decompress(
+        {self._bytes}(
+            {self._map}({decode_f}, {self._bytes}({a}[{obfuscate_int(4)}]))
+        )
+    )
+    .decode()
+)
+
 (lambda {(a:=self.junk_string())}: (
     {a}[{obfuscate_int(2)}]({a}[{obfuscate_int(5)}])
     .setrecursionlimit({obfuscate_int(999999999)})
@@ -197,18 +210,19 @@ class Dropper:
     ))
 ))({_l})"""
 
-        md5sum = hashlib.md5(tmp.encode()).digest()
+        md5sum = str(hashlib.md5(tmp.encode()).digest())
+        s = secrets.token_hex(64)
 
         _code = f"(lambda {(r := self.junk_string())}: (eval("
         _code += obfuscate_string('exit()')
         _code += ")if("
         _code += f"__import__('{string_to_hex('hashlib')}').md5("
         _code += f"open((e:=eval)('{string_to_hex('__file__')}'))"
-        _code += f".read().split('{string_to_hex('# hello from dwoppah')}')"
+        _code += f".read().split('{string_to_hex(f'# {s}')}')"
         _code += f"[{obfuscate_int(1)}].encode()).digest()!={md5sum}"
         _code += f") else (e('{string_to_hex('None')}') or {r})"
         _code += f"))('{secrets.randbits(64)}')\n\n"
-        _code += "# hello from dwoppah"
+        _code += f"# {s}"
         _code += tmp
 
         return _code

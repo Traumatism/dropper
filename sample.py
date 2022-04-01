@@ -24,6 +24,7 @@ def function(a: int, x: int) -> int:
     return a + x
 
 
+print(1)
 print("this is a string")
 print(b"this is bytes")
 print("this is a float", 0.001)

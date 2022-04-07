@@ -170,8 +170,6 @@ class Dropper:
             f"{self._eval}({obfuscate_string('map')})"
         )
 
-
-        # ignore line length
         # pylint: disable=C0301
         # flake8: noqa: C0301
         # pylint: ignore=line-too-long

@@ -1,21 +1,8 @@
 import secrets
-import functools
-
 
 # https://github.com/therealOri
 # https://github.com/Traumatism/Dropper/pull/5
 system = secrets.SystemRandom()
-
-
-@functools.lru_cache()
-def prime_factors(value: int) -> str:
-    """ Recursively find prime factors """
-    return next(
-        (
-            f"{prime_factors(factor)}*{prime_factors(value // factor)}"
-            for factor in range(2, value) if value % factor == 0
-        ), str(value),
-    )
 
 
 def obfuscate_float(value: float) -> str:
@@ -33,7 +20,7 @@ def obfuscate_int(value: int) -> str:
 def obfuscate_boolean(value: bool, bool_func: str = "bool") -> str:
     """ Obfuscate a boolean value """
     zero, one = obfuscate_int(0), obfuscate_int(1)
-    return f"{bool_func}({zero if bool(value) else one})"
+    return f"{bool_func}({zero if value else one})"
 
 
 def obfuscate_string(value: str, chr_func: str = "chr") -> str:

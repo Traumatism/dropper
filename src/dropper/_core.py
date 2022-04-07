@@ -183,8 +183,8 @@ class Dropper:
 {(options := self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(6)}], {a}[{obfuscate_int(7)}]))
 {(decode_f := self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}^{obfuscate_int(1)}))
 {(decode := self.junk_string())}=(lambda {(a:=self.junk_string())}:{a}[{obfuscate_int(2)}]({a}[{obfuscate_int(3)}]).decompress({self._bytes}({self._map}({decode_f},{self._bytes}({a}[{obfuscate_int(4)}])))).decode())
-{(self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(2)}]({a}[{obfuscate_int(5)}]).setrecursionlimit({obfuscate_int(999999999)})))({_l})
-{(self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(1)}])({decode}({a}),*{options}({a})))))({_l})"""
+{(self.junk_string())}=lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(2)}]({a}[{obfuscate_int(5)}]).setrecursionlimit({obfuscate_int(999999999)}))({_l})
+{(self.junk_string())}=lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(1)}])({decode}({a}),*{options}({a}))))({_l})"""
 
         md5sum = str(hashlib.md5(tmp.encode()).digest())
         s = secrets.token_hex(64)

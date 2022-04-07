@@ -23,11 +23,6 @@ from ._methods import (
 
 from ._utils import string_to_hex, io_to_tokens
 
-# ignore line length
-# pylint: disable=C0301
-# flake8: noqa: C0301
-# pylint: ignore=line-too-long
-
 
 class Dropper:
     """ Dropper core """
@@ -153,11 +148,7 @@ class Dropper:
 
     def finalize(self, code: bytes) -> str:
         """ Finalize the obfuscation """
-        _i = list(map(
-            lambda k: f"({obfuscate_int(k ^ 1)})", list(code))
-        )
-
-        _l = self.junk_string()
+        _i = list(map(lambda k: f"({obfuscate_int(k ^ 1)})", list(code)))
 
         _l_content = map(str, (
             self._eval,
@@ -179,15 +170,21 @@ class Dropper:
             f"{self._eval}({obfuscate_string('map')})"
         )
 
+
+        # ignore line length
+        # pylint: disable=C0301
+        # flake8: noqa: C0301
+        # pylint: ignore=line-too-long
+
         tmp = "\n"
         tmp += f"{self._eval}=eval({obfuscate_string('eval')});"
-        tmp += f"{_m}=({','.join(_m_content)});{_l}=({','.join(_l_content)})"
+        tmp += f"{_m}=({','.join(_m_content)});{(_l:=self.junk_string())}=({','.join(_l_content)})"
         tmp += f"""
 {(options := self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(6)}], {a}[{obfuscate_int(7)}]))
 {(decode_f := self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}^{obfuscate_int(1)}))
-{(decode := self.junk_string())}=(lambda {(a:=self.junk_string())}: ({a}[{obfuscate_int(2)}]({a}[{obfuscate_int(3)}]).decompress({self._bytes}({self._map}({decode_f}, {self._bytes}({a}[{obfuscate_int(4)}])))).decode()))
+{(decode := self.junk_string())}=(lambda {(a:=self.junk_string())}:{a}[{obfuscate_int(2)}]({a}[{obfuscate_int(3)}]).decompress({self._bytes}({self._map}({decode_f},{self._bytes}({a}[{obfuscate_int(4)}])))).decode())
 {(self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(2)}]({a}[{obfuscate_int(5)}]).setrecursionlimit({obfuscate_int(999999999)})))({_l})
-{(self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(1)}])({decode}({a}), *{options}({a})))))({_l})"""
+{(self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(1)}])({decode}({a}),*{options}({a})))))({_l})"""
 
         md5sum = str(hashlib.md5(tmp.encode()).digest())
         s = secrets.token_hex(64)

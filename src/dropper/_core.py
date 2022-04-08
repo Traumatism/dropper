@@ -139,6 +139,7 @@ class Dropper:
                     )
 
             if _type == NUMBER:
+
                 if string.isdigit():
                     string = obfuscate_int(eval(string))
 
@@ -183,13 +184,14 @@ class Dropper:
 {(options := self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(6)}], {a}[{obfuscate_int(7)}]))
 {(decode_f := self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}^{obfuscate_int(1)}))
 {(decode := self.junk_string())}=(lambda {(a:=self.junk_string())}:{a}[{obfuscate_int(2)}]({a}[{obfuscate_int(3)}]).decompress({self._bytes}({self._map}({decode_f},{self._bytes}({a}[{obfuscate_int(4)}])))).decode())
-{(self.junk_string())}=lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(2)}]({a}[{obfuscate_int(5)}]).setrecursionlimit({obfuscate_int(999999999)}))({_l})
-{(self.junk_string())}=lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(1)}])({decode}({a}),*{options}({a}))))({_l})"""
+(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(2)}]({a}[{obfuscate_int(5)}]).setrecursionlimit({obfuscate_int(999999999)})))({_l})
+(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(1)}])({decode}({a}),*{options}({a})))))({_l})"""
 
         md5sum = str(hashlib.md5(tmp.encode()).digest())
         s = secrets.token_hex(64)
 
-        _code = f"(lambda {(r := self.junk_string())}: (eval("
+        _code = ""
+        _code += f"(lambda {(r := self.junk_string())}: (eval("
         _code += obfuscate_string('exit()')
         _code += ")if("
         _code += f"__import__('{string_to_hex('hashlib')}').md5("

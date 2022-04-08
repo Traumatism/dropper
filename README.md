@@ -1,6 +1,6 @@
 # dropper
 
-A Python 3.10 obfuscator
+![](./preview.png)
 
 # Methods
 

@@ -3,6 +3,7 @@ import os
 from typer import Option, Argument, run
 
 from ._core import Dropper
+from ._core import console
 
 
 def main(
@@ -35,12 +36,21 @@ def main(
     ),
 ) -> None:
 
-    print("""
+    console.print(
+        """
+[green]
+    __
+.--|  |.----.-----.-----.-----.-----.----.
+|  _  ||   _|  _  |  _  |  _  |  -__|   _|
+|_____||__| |_____|   __|   __|_____|__|
+                  |__|  |__|
 
-Dropper 🐍  Obfuscator
-by @toastakerman
-
-    """)
+[cyan]Python 3.10 obfuscator[/]
+by [green]@toastakerman[/] [bright_black](github.com/traumatism)[/]
+[/]
+        """
+        .replace(".--", "[white].--[/]")
+    )
 
     with open(file_path, "r") as f:
         code = f.read()

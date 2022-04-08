@@ -23,6 +23,8 @@ from ._methods import (
 
 from ._utils import string_to_hex, io_to_tokens
 
+console = Console()
+
 
 class Dropper:
     """ Dropper core """
@@ -35,7 +37,6 @@ class Dropper:
         obfuscate_ints: bool = True,
         obfuscate_strings: bool = True,
         obfuscate_names: bool = True,
-        console: Optional[Console] = None
     ) -> None:
 
         self.junk_strings_lenght = junk_strings_lenght
@@ -47,7 +48,7 @@ class Dropper:
         self.obfuscate_strings = obfuscate_strings
         self.obfuscate_names = obfuscate_names
 
-        self.console = console or Console()
+        self.console = console
 
         self.junk_strs: List[int] = []
         self.funcs_map: Dict[str, str] = {}
@@ -170,6 +171,7 @@ class Dropper:
             f"{self._eval}({obfuscate_string('map')})"
         )
 
+        # ignore line length
         # pylint: disable=C0301
         # flake8: noqa: C0301
         # pylint: ignore=line-too-long
@@ -193,9 +195,9 @@ class Dropper:
         _code += f"__import__('{string_to_hex('hashlib')}').md5("
         _code += f"open((e:=eval)('{string_to_hex('__file__')}'))"
         _code += f".read().split('{string_to_hex(f'# {s}')}')"
-        _code += f"[{obfuscate_int(1)}].encode()).digest()!={r}"
+        _code += f"[{obfuscate_int(1)}].encode()).digest()!={md5sum}"
         _code += f") else (e('{string_to_hex('None')}') or {r})"
-        _code += f"))({md5sum})\n\n"
+        _code += f"))('{secrets.randbits(64)}')\n\n"
         _code += f"# {s}"
         _code += tmp
 

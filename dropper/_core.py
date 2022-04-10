@@ -58,6 +58,7 @@ class Dropper:
         self._bytes = self.junk_string()
         self._chr = self.junk_string()
         self._map = self.junk_string()
+        self._lbd = self.junk_string()
 
         table = Table(title="Built-ins")
 
@@ -150,7 +151,12 @@ class Dropper:
 
     def finalize(self, code: bytes) -> str:
         """ Finalize the obfuscation """
-        _i = list(map(lambda k: f"({obfuscate_int(k ^ 1)})", list(code)))
+        _i = list(
+            map(
+                lambda k: f"({obfuscate_int(k ^ 10)})",
+                list(code)
+            )
+        )
 
         _l_content = map(str, (
             self._eval,
@@ -178,29 +184,29 @@ class Dropper:
         # pylint: ignore=line-too-long
 
         tmp = "\n"
+
         tmp += f"{self._eval}=eval({obfuscate_string('eval')});"
         tmp += f"{_m}=({','.join(_m_content)});{(_l:=self.junk_string())}=({','.join(_l_content)})"
         tmp += f"""
-{(options := self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(6)}], {a}[{obfuscate_int(7)}]))
-{(decode_f := self.junk_string())}=(lambda {(a:=self.junk_string())}:({a}^{obfuscate_int(1)}))
-{(decode := self.junk_string())}=(lambda {(a:=self.junk_string())}:{a}[{obfuscate_int(2)}]({a}[{obfuscate_int(3)}]).decompress({self._bytes}({self._map}({decode_f},{self._bytes}({a}[{obfuscate_int(4)}])))).decode())
-(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(2)}]({a}[{obfuscate_int(5)}]).setrecursionlimit({obfuscate_int(999999999)})))({_l})
-(lambda {(a:=self.junk_string())}:({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(1)}])({decode}({a}),*{options}({a})))))({_l})"""
+
+def {self._lbd}({(a:=self.junk_string())}, {(b:=self.junk_string())}):
+    return {self._eval}('{string_to_hex("lambda ")}'+{a}+'{string_to_hex(":")}'+{b})
+
+{(options := self.junk_string())} = {self._lbd}('{(a:=self.junk_string())}','({a}[{obfuscate_int(6)}], {a}[{obfuscate_int(7)}])')
+{(decode_f := self.junk_string())} = {self._lbd}('{(a:=self.junk_string())}','{a}^{obfuscate_int(10)}')
+{(decode := self.junk_string())} = {self._lbd}('{(a:=self.junk_string())}','{a}[{obfuscate_int(2)}]({a}[{obfuscate_int(3)}]).decompress({self._bytes}({self._map}({decode_f},{self._bytes}({a}[{obfuscate_int(4)}])))).decode()')
+{(self.junk_string())} = {self._lbd}('{(a:=self.junk_string())}','({a}[{obfuscate_int(2)}]({a}[{obfuscate_int(5)}]).setrecursionlimit({obfuscate_int(999999999)}))')({_l})
+{(self.junk_string())} = {self._lbd}('{(a:=self.junk_string())}','({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(0)}]({a}[{obfuscate_int(1)}])({decode}({a}),*{options}({a}))))')({_l})"""
 
         md5sum = str(hashlib.md5(tmp.encode()).digest())
         s = secrets.token_hex(64)
 
-        _code = ""
-        _code += f"(lambda {(r := self.junk_string())}: (eval("
-        _code += obfuscate_string('exit()')
-        _code += ")if("
-        _code += f"__import__('{string_to_hex('hashlib')}').md5("
-        _code += f"open((e:=eval)('{string_to_hex('__file__')}'))"
-        _code += f".read().split('{string_to_hex(f'# {s}')}')"
-        _code += f"[{obfuscate_int(1)}].encode()).digest()!={md5sum}"
-        _code += f") else (e('{string_to_hex('None')}') or {r})"
-        _code += f"))('{secrets.randbits(64)}')\n\n"
-        _code += f"# {s}"
+        _code = """
+# ignore line length
+# pylint: disable=C0301
+# flake8: noqa: C0301
+# pylint: ignore=line-too-long\n"""
+        _code += f"(lambda {(r := self.junk_string())}:(eval({obfuscate_string('exit(0)')})if(__import__('{string_to_hex('hashlib')}').md5(open(eval('{string_to_hex('__file__')}')).read().split('{string_to_hex(f'# {s}')}')[{obfuscate_int(1)}].encode()).digest()!={md5sum})else({r})))('{secrets.randbits(64)}')\n# {s}"
         _code += tmp
 
         return _code

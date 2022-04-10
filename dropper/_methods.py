@@ -11,9 +11,9 @@ def obfuscate_float(value: float) -> str:
     return f"(({obfuscate_int(unit)})+.{sec})"
 
 
-def obfuscate_int(value: int, shift: int = system.randint(0, 100)) -> str:
+def obfuscate_int(value: int, shift: int = system.randint(1, 10)) -> str:
     """ Obfuscate an integer value """
-    return f"{hex(value ^ shift)}^{hex(shift)}"
+    return f"{hex(value << shift)}>>{hex(shift)}"
 
 
 def obfuscate_boolean(value: bool, bool_func: str = "bool") -> str:

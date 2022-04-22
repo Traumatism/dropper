@@ -5,7 +5,7 @@ import time
 
 from io import BytesIO
 
-from typing import Dict, List, Optional, Generator
+from typing import Dict, List, Generator
 
 from token import NAME, STRING, NUMBER
 from tokenize import untokenize, TokenInfo
@@ -151,19 +151,14 @@ class Dropper:
 
     def finalize(self, code: bytes) -> str:
         """ Finalize the obfuscation """
-        _i = list(
-            map(
-                lambda k: f"({obfuscate_int(k ^ 10)})",
-                list(code)
-            )
-        )
+        _i = map(lambda k: f"({obfuscate_int(k ^ 10)})", list(code))
 
         _l_content = map(str, (
             self._eval,
             obfuscate_string("compile", self._chr),
             f"{self._eval}({obfuscate_string('__import__', self._chr)})",
             obfuscate_string("zlib", self._chr),
-            f"{self._map}({self._eval},{_i})",
+            f"{self._map}({self._eval},{list(_i)})",
             obfuscate_string("sys", self._chr),
             obfuscate_string("<string>", self._chr),
             obfuscate_string("exec", self._chr)

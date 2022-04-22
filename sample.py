@@ -21,6 +21,7 @@ class Foo:
 
 def function(a: int, x: int) -> int:
     """ This is a function """
+    print("function called!")
     return a + x
 
 

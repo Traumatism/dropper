@@ -1,4 +1,4 @@
-# dropper
+# Dropper
 
 ![](./assets/preview.png)
 

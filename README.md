@@ -1,6 +1,6 @@
 # Dropper
 
-![](./assets/preview.png)
+![](./assets/preview-1.png)
 
 # Methods
 

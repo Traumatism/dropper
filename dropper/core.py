@@ -229,14 +229,6 @@ def {self._lbd}({(a:=self.junk_string())}, {(b:=self.junk_string())}):
 
             obfuscated = untokenize(final_tokens)
 
-        self.console.log("Compressing code...")
-
-        compressed = zlib.compress(obfuscated, 9)
-
-        self.console.log("Generating final code...")
-
-        self.code = self.finalize(compressed)
-
         table = Table(title="Functions & classes")
 
         table.add_column("Name")
@@ -246,6 +238,14 @@ def {self._lbd}({(a:=self.junk_string())}, {(b:=self.junk_string())}):
             table.add_row(f"{name}(...)", f"{new_name}(...)")
 
         self.console.log(Panel.fit(table))
+
+        self.console.log("Compressing code...")
+
+        compressed = zlib.compress(obfuscated, 9)
+
+        self.console.log("Generating final code...")
+
+        self.code = self.finalize(compressed)
 
     def obfuscate(self) -> str:
         """Obfuscate the code"""

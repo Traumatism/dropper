@@ -1,5 +1,5 @@
 __pycache__
-
+obf_*.py
 # Temporary and binary files
 *~
 *.py[cod]

@@ -2,7 +2,7 @@ import os  # this is a module
 
 
 class Foo:
-    """ This is a class """
+    """This is a class"""
 
     def __init__(self) -> None:
         self.__bar = "hello world"
@@ -20,7 +20,7 @@ class Foo:
 
 
 def function(a: int, x: int) -> int:
-    """ This is a function """
+    """This is a function"""
     print("function called!")
     return a + x
 

@@ -2,54 +2,73 @@ import os
 
 from typer import Option, Argument, run
 
-from ._core import Dropper
-from ._core import console
+from .core import Dropper
+from .core import console
 
 
 def main(
     file_path: str = Argument(
-        ..., help="Path to the file to obfuscate",
+        ...,
+        help="Path to the file to obfuscate",
         metavar="<path>",
         exists=True,
         dir_okay=False,
-        readable=True
+        readable=True,
     ),
     junk_strings_len: int = Option(
-        16, "--junk-strings-len", "-j", help="The length of the junk strings",
-        metavar="<value>", min=4, max=32
+        16,
+        "--junk-strings-len",
+        "-j",
+        help="The length of the junk strings",
+        metavar="<value>",
+        min=4,
+        max=32,
     ),
     obfuscate_bools: bool = Option(
-        True, "-nB", help="Don't obfuscate boolean values",
-        flag_value=True, show_default=False
+        True,
+        "-nB",
+        help="Don't obfuscate boolean values",
+        flag_value=True,
+        show_default=False,
     ),
     obfuscate_ints: bool = Option(
-        True, "-nI", help="Don't obfuscate integer values",
-        flag_value=True, show_default=False
+        True,
+        "-nI",
+        help="Don't obfuscate integer values",
+        flag_value=True,
+        show_default=False,
     ),
     obfuscate_strings: bool = Option(
-        True, "-nS", help="Don't obfuscate string values",
-        flag_value=True, show_default=False
+        True,
+        "-nS",
+        help="Don't obfuscate string values",
+        flag_value=True,
+        show_default=False,
     ),
     obfuscate_names: bool = Option(
-        True, "-nN", help="Don't obfuscate function names",
-        flag_value=True, show_default=False
+        True,
+        "-nN",
+        help="Don't obfuscate function names",
+        flag_value=True,
+        show_default=False,
     ),
 ) -> None:
 
     console.print(
         """
 [green]
-    __
-.--|  |.----.-----.-----.-----.-----.----.
-|  _  ||   _|  _  |  _  |  _  |  -__|   _|
-|_____||__| |_____|   __|   __|_____|__|
-                  |__|  |__|
+     __                          
+ ___/ /______  ___  ___  ___ ____
+/ _  / __/ _ \/ _ \/ _ \/ -_) __/
+\_,_/_/  \___/ .__/ .__/\__/_/   
+            /_/  /_/             
 
 [cyan]Python 3.10 obfuscator[/]
 by [green]@toastakerman[/] [bright_black](github.com/traumatism)[/]
 [/]
-        """
-        .replace(".--", "[white].--[/]")
+        """.replace(
+            ".--", "[white].--[/]"
+        )
     )
 
     with open(file_path, "r") as f:
@@ -61,11 +80,12 @@ by [green]@toastakerman[/] [bright_black](github.com/traumatism)[/]
         obfuscate_bools=obfuscate_bools,
         obfuscate_ints=obfuscate_ints,
         obfuscate_strings=obfuscate_strings,
-        obfuscate_names=obfuscate_names
+        obfuscate_names=obfuscate_names,
     ).obfuscate()
 
     output_file = (
-        f"obf_{file_path}" if "/" not in file_path and "\\" not in file_path
+        f"obf_{file_path}"
+        if "/" not in file_path and "\\" not in file_path
         else f"obf_{file_path.split(os.path.sep)[-1]}"
     )
 

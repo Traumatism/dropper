@@ -64,7 +64,7 @@ def main(
             /_/  /_/             
 
 [cyan]Python 3.10 obfuscator[/]
-by [green]@toastakerman[/] [bright_black](github.com/traumatism)[/]
+by [green]@t0x00ast[/] [bright_black](github.com/traumatism)[/]
 [/]
         """.replace(
             ".--", "[white].--[/]"

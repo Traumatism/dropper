@@ -95,3 +95,4 @@ by [green]@t0x00ast[/] [bright_black](github.com/traumatism)[/]
 
 if __name__ == "__main__":
     run(main)
+

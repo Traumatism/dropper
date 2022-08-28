@@ -85,7 +85,8 @@ class Dropper:
         # https://github.com/therealOri
         # https://github.com/Traumatism/Dropper/pull/5
         s = secrets.randbits(self.junk_strings_lenght)
-
+    
+        # recursion prevents doubles
         if s in self.junk_strings:
             return self.junk_string()
 
@@ -195,12 +196,14 @@ def {self._lbd}({(a:=self.junk_string())}, {(b:=self.junk_string())}):
         """
 
         md5sum = str(hashlib.md5(tmp.encode()).digest())
+
         s = secrets.token_hex(64)
 
         _code = """
 # pylint: disable=C0301
 # flake8: noqa: C0301
 # pylint: ignore=line-too-long\n"""
+
         _code += f"(lambda {(r := self.junk_string())}:(eval({obfuscate_string('exit(0)')})if(__import__('{string_to_hex('hashlib')}').md5(open(eval('{string_to_hex('__file__')}')).read().split('{string_to_hex(f'# {s}')}')[{obfuscate_int(1)}].encode()).digest()!={md5sum})else({r})))('{secrets.randbits(64)}')\n# {s}"
         _code += tmp
 
